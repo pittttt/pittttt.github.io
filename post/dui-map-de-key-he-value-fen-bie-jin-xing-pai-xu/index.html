@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>对Map的key和value分别进行排序 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/ScxC31krUz6H8dN.png)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">对Map的key和value分别进行排序</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-05-13 23:02:05" itemprop="datePublished" pubdate="">2020-05-13</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,86 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<p><strong>今天写算法题的时候遇到了map的排序，记录一下</strong></p>
+<p><strong>1.对map的key进行排序</strong><br>
+最简单的就是利用TreeMap，TreeMap默认为升序排序，如果需要降序，调用descendingMap()方法即可，代码如下：</p>
+<pre><code class="language-java">public static void main(String[] args) {
+		// 默认按照key值正序排列
+		Map&lt;String, Integer&gt; treeMap = new TreeMap&lt;&gt;();
+		// 按照key值倒序排列
+		// Map&lt;Object, Object&gt; treeMap = new TreeMap&lt;&gt;().descendingMap();
+		treeMap.put(&quot;b&quot;, 3);
+		treeMap.put(&quot;c&quot;, 4);
+		treeMap.put(&quot;a&quot;, 7);
+		treeMap.put(&quot;d&quot;, 1);
+		for (Map.Entry&lt;Object, Object&gt; entry : treeMap.entrySet()) {
+			System.out.println(&quot;Key=&quot; + entry.getKey() + &quot;, Value=&quot; + entry.getValue());
+		}
+	}
+	
+	//输出为
+	Key=a, Value=7
+	Key=b, Value=3
+	Key=c, Value=4
+	Key=d, Value=1
+</code></pre>
+<p><strong>2.对map的value进行排序</strong><br>
+将map的entry转化为list，通过sort()方法进行排序后输出，此方法同样适用于TreeMap，代码如下:</p>
+<pre><code class="language-java">public static void main(String[] args) {
+		Map&lt;String, Integer&gt; hashMap = new HashMap&lt;&gt;();
+		hashMap.put(&quot;b&quot;, 3);
+		hashMap.put(&quot;c&quot;, 4);
+		hashMap.put(&quot;a&quot;, 7);
+		hashMap.put(&quot;d&quot;, 1);
+		// 转换成list
+		List&lt;Map.Entry&lt;String, Integer&gt;&gt; list = new ArrayList&lt;&gt;(hashMap.entrySet());
+		Collections.sort(list, new Comparator&lt;Map.Entry&lt;String, Integer&gt;&gt;() {
+			// 升序排序
+			@Override
+			public int compare(Entry&lt;String, Integer&gt; o1, Entry&lt;String, Integer&gt; o2) {
+				return o1.getValue().compareTo(o2.getValue());
+			}
+		});
+		// 初始排列顺序
+		System.out.println(&quot;初始顺序为&quot;);
+		for (Map.Entry&lt;String, Integer&gt; entry : hashMap.entrySet()) {
+			System.out.println(&quot;Key=&quot; + entry.getKey() + &quot;, Value=&quot; + entry.getValue());
+		}
+		System.out.println(&quot;---------&quot;);
+		// 按照value排序后输出
+		System.out.println(&quot;value排序后顺序为&quot;);
+		for (Map.Entry&lt;String, Integer&gt; entry : list) {
+			System.out.println(&quot;Key=&quot; + entry.getKey() + &quot;, Value=&quot; + entry.getValue());
+		}
+	}
+	
+	//输出为
+	初始顺序为
+	Key=a, Value=7
+	Key=b, Value=3
+	Key=c, Value=4
+	Key=d, Value=1
+	---------
+	value排序后顺序为
+	Key=d, Value=1
+	Key=b, Value=3
+	Key=c, Value=4
+	Key=a, Value=7
+</code></pre>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
 		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/hello-world/" rel="next"> Hello World</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

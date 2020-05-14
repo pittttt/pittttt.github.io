@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>查看java程序堆内存等命令和jvm可视化工具 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/7nAJk9bXyVcYwdG.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">查看java程序堆内存等命令和jvm可视化工具</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-03-14 23:40:50" itemprop="datePublished" pubdate="">2020-03-14</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,148 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<p><strong>几个主要的命令：</strong><br>
+jps:与unix上的ps类似，用来显示本地的java进程，可以查看本地运行着几个java程序，并显示他们的进程号。<br>
+jstat:一个极强的监视VM内存工具。可以用来监视VM内存内的各种堆和非堆的大小及其内存使用量。<br>
+jmap:打印出某个java进程（使用pid）内存内的所有'对象'的情况（如：产生那些对象，及其数量）。<br>
+jconsole:一个java GUI监视工具，可以以图表化的形式显示各种数据。并可通过远程连接监视远程的服务器VM。</p>
+<p><em>启动秒杀系统作为测试</em></p>
+<p><strong>1、JPS命令</strong><br>
+可以查到当前服务器启动的进程号为2128</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jps
+2128 Bootstrap
+8720 MyEclipse
+23704 QuorumPeerMain
+29288 Jps
+</code></pre>
+<p><strong>2、JSTAT命令</strong><br>
+此命令可以用来查看加载class的数量级占用的空间</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -class 2128
+Loaded  Bytes  Unloaded  Bytes     Time
+ 21627 40737.3        0     0.0      17.63
+</code></pre>
+<hr>
+<p>此命令可以用来产看jvn编译的数量信息</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -compiler 2128
+Compiled Failed Invalid   Time   FailedType FailedMethod
+   10344      3       0    45.47          1 org/springframework/beans/GenericTypeAwarePropertyDescriptor &lt;init&gt;
+</code></pre>
+<hr>
+<p>此命令可以用来查看GC的信息和GC的次数</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -gc 2128
+ S0C    S1C    S0U    S1U      EC       EU        OC         OU       MC     MU    CCSC   CCSU   YGC     YGCT    FGC    FGCT     GCT
+512.0  1024.0 384.0   0.0   133120.0 74622.8   163840.0   71196.1   119792.0 117433.6 14896.0 14580.7    116    0.763   4      0.332    1.095
+</code></pre>
+<hr>
+<p>此命令可以用来产看young，old和perm区的对象和使用大小</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -gccapacity 2128
+ NGCMN    NGCMX     NGC     S0C   S1C       EC      OGCMN      OGCMX       OGC         OC       MCMN     MCMX      MC     CCSMN    CCSMX     CCSC    YGC    FGC
+ 43520.0 689152.0 235008.0  512.0  512.0 121856.0    87552.0  1379328.0   163840.0   163840.0      0.0 1155072.0 119792.0      0.0 1048576.0  14896.0    227     4
+</code></pre>
+<hr>
+<p>此命令可以用来查看当前VM执行信息</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -printcompilation 2128
+Compiled  Size  Type Method
+   10468      2    1 java/nio/DirectByteBuffer isDirect
+</code></pre>
+<p><strong>3、jinfo 可以用来查看和更改java进程运行的参数</strong></p>
+<p><strong>4、jmap命令可以用来查看堆中的活动对象及大小</strong></p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jmap -heap 2128
+Attaching to process ID 2128, please wait...
+Debugger attached successfully.
+Client compiler detected.
+
+using thread-local object allocation.
+Mark Sweep Compact GC
+
+Heap Configuration:
+   MinHeapFreeRatio = 40
+   MaxHeapFreeRatio = 70
+   MaxHeapSize      = 268435456 (256.0MB)
+   NewSize          = 1048576 (1.0MB)
+   MaxNewSize       = 4294901760 (4095.9375MB)
+   OldSize          = 4194304 (4.0MB)
+   NewRatio         = 2
+   SurvivorRatio    = 8
+   PermSize         = 12582912 (12.0MB)
+   MaxPermSize      = 67108864 (64.0MB)
+   G1HeapRegionSize = 0 (0.0MB)
+
+Heap Usage:
+New Generation (Eden + 1 Survivor Space):
+   capacity = 36700160 (35.0MB)
+   used     = 4734920 (4.515571594238281MB)
+   free     = 31965240 (30.48442840576172MB)
+   12.901633126395089% used
+Eden Space:
+   capacity = 32636928 (31.125MB)
+   used     = 4734920 (4.515571594238281MB)
+   free     = 27902008 (26.60942840576172MB)
+   14.50786054373745% used
+From Space:
+   capacity = 4063232 (3.875MB)
+   used     = 0 (0.0MB)
+   free     = 4063232 (3.875MB)
+   0.0% used
+To Space:
+   capacity = 4063232 (3.875MB)
+   used     = 0 (0.0MB)
+   free     = 4063232 (3.875MB)
+   0.0% used
+tenured generation:
+   capacity = 81498112 (77.72265625MB)
+   used     = 30978160 (29.543075561523438MB)
+   free     = 50519952 (48.17958068847656MB)
+   38.0108928167563% used
+Perm Generation:
+   capacity = 39059456 (37.25MB)
+   used     = 38951352 (37.14690399169922MB)
+   free     = 108104 (0.10309600830078125MB)
+   99.72323219248112% used
+
+22804 interned Strings occupying 2668488 bytes.
+</code></pre>
+<p><strong>5、jconsole工具</strong><br>
+输入jconsole后出现jconsole的界面<br>
+<img src="https://img-blog.csdnimg.cn/20200314233011602.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><img src="https://img-blog.csdnimg.cn/20200314233047801.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+其中内存分区如下说明，</p>
+<p>Eden Space (heap)： 内存最初从这个线程池分配给大部分对象。<br>
+Survivor Space (heap)：用于保存在eden space内存池中经过垃圾回收后没有被回收的对象。<br>
+Tenured Generation (heap)：用于保持已经在 survivor space内存池中存在了一段时间的对象。<br>
+Permanent Generation (non-heap): 保存虚拟机自己的静态(refective)数据，例如类（class）和方法（method）对象。Java虚拟机共享这些类数据。这个区域被分割为只读的和只写的，<br>
+Code Cache (non-heap):HotSpot Java虚拟机包括一个用于编译和保存本地代码（native code）的内存，叫做“代码缓存区”（code cache）<br>
+<strong>6、jstack命令</strong><br>
+此命令用来查看进程下jvm的运行状态</p>
+<pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstack 2128
+</code></pre>
+<p><strong>7、工具</strong><br>
+bin目录下提供了多种工具来监控jvm的运行运行状态，能通过图示很好的进行监控以便进行问题排查和优化</p>
+<p>jvisualvm.exe<br>
+<img src="https://img-blog.csdnimg.cn/20200314233745717.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<hr>
+<p>jmc.exe<br>
+<img src="https://img-blog.csdnimg.cn/20200314233947488.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<blockquote>
+<p>参考：http://boendev.iteye.com/blog/882479</p>
+</blockquote>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/hRDXgQ1Mf/" rel="tag">JVM</a>	
+				 
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/springboot-xiang-mu-diao-you-ji-la-ji-hui-shou-qi-de-bi-jiao/" rel="prev"> SpringBoot项目调优及垃圾回收器的比较</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/nested-exception-is-orgapacheibatisbindingbindingexception-parameter-useridji-jsp-zhong-onclick-bao-cuo-jie-jue-fang-an/" rel="next"> nested exception is org.apache.ibatis.binding.BindingException: Parameter &#39;userId&#39;及JSP中onclick报错解决方案</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

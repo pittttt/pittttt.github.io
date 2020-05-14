@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>nested exception is org.apache.ibatis.binding.BindingException: Parameter &#39;userId&#39;及JSP中onclick报错解决方案 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/dipqsjberwG78CL.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">nested exception is org.apache.ibatis.binding.BindingException: Parameter &#39;userId&#39;及JSP中onclick报错解决方案</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-02-15 11:27:18" itemprop="datePublished" pubdate="">2020-02-15</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,45 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<h2 id="一-ibatisbindingbindingexception">一、ibatis.binding.BindingException</h2>
+<p>后台接受由前端传过来的参数并通过mybatis写入数据库时，报错：<br>
+<strong>nested exception is org.apache.ibatis.binding.BindingException: Parameter 'userId'</strong></p>
+<p>原因为Mapper接口中的参数定义没有加 <mark>@Param</mark> 参数导致无法识别和进行绑定从而报错</p>
+<pre><code class="language-java">int countByKillUserId(@Param(&quot;killId&quot;) Integer killId, @Param(&quot;userId&quot;) Integer userId);
+</code></pre>
+<h2 id="二-uncaught-referenceerror-xxx-is-not-defined-at-htmlbuttonelementonclick">二、Uncaught ReferenceError: XXX is not defined at HTMLButtonElement.onclick</h2>
+<p>onclick点击事件报错原因可能有两个<br>
+<strong>1.</strong><code>&lt;script src=&quot;${ctx}/static/plugins/jquery.js&quot;&gt;&lt;/script&gt;</code><br>
+<mark>script标签没有闭合，缺少&lt; /script&gt;</mark><br>
+<strong>2.<strong>点击事件内部方法报错，导致报错Uncaught ReferenceError<br>
+在写<code>&lt; a class=&quot;btn btn-info&quot; style=&quot;font-size: 20px&quot; onclick=&quot;executeKill()&quot;&gt;抢购&lt;/a&gt;</code>中的executeKill()方法时，调用了getJsonData()方法，结果发现<mark>data参数中少写了一个逗号</mark>，导致外部点击事件报错</strong>Uncaught ReferenceError: executeKill() is not defined at HTMLButtonElement.onclick</strong></p>
+<pre><code class="language-javascript">function getJsonData() {
+        var killId=$(&quot;#killId&quot;).val();
+        var data = {
+            &quot;killId&quot;:killId,
+            &quot;userId&quot;:5
+        };
+        return data;
+    }
+</code></pre>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/e8F9VryvP/" rel="tag">MyBatis</a>	
+				 
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/cha-kan-java-cheng-xu-dui-nei-cun-deng-ming-ling-he-jvm-ke-shi-hua-gong-ju/" rel="prev"> 查看java程序堆内存等命令和jvm可视化工具</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/mybatis-ni-xiang-gong-cheng-hou-bao-cuo-illegalargumentexception-result-maps-collection-already-contains-value-for-xxx/" rel="next"> Mybatis逆向工程后报错IllegalArgumentException: Result Maps collection already contains value for xxx</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

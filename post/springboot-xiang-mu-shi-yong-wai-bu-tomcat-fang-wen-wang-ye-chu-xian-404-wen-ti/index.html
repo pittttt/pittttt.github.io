@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>SpringBoot项目使用外部Tomcat访问网页出现404问题 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/aFWAIR5v84ehJME.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">SpringBoot项目使用外部Tomcat访问网页出现404问题</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-02-11 23:05:42" itemprop="datePublished" pubdate="">2020-02-11</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,54 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<h2 id="1修改pom文件">1.修改pom文件</h2>
+<pre><code class="language-xml"> &lt;packaging&gt;war&lt;/packaging&gt;
+ &lt;dependency&gt;
+       &lt;groupId&gt;org.springframework.boot&lt;/groupId&gt;
+       &lt;artifactId&gt;spring-boot-starter-tomcat&lt;/artifactId&gt;
+       &lt;scope&gt;provided&lt;/scope&gt;
+&lt;/dependency&gt;
+</code></pre>
+<h2 id="2修改application启动类">2.修改Application启动类</h2>
+<pre><code class="language-java">@SpringBootApplication
+public class MainApplication extends SpringBootServletInitializer {
+
+	@Override
+	protected SpringApplicationBuilder configure(SpringApplicationBuilder builder) {
+		return builder.sources(MainApplication.class);
+	}
+
+	public static void main(String[] args) {
+		SpringApplication.run(MainApplication.class, args);
+	}
+}
+</code></pre>
+<p><strong>问题：</strong><br>
+修改完成后，Tomcat和Sprinboot可以正常启动，可以访问Tomcat主页，但是无法访问项目中的JSP文件，报错404<br>
+<strong>解决：</strong><br>
+尝试了很多方法并且浪费了很多时间，发现在<mark>外部的Tomcat配置文件server.xml中有自带了默认访问路径path</mark>，所以在访问项目时要带上path中项目名。将path修改为空，如下图，则可以直接访问JSP页面，<mark>这点和SpringBoot的内嵌Tomcat不同。</mark></p>
+<pre><code class="language-xml">&lt;Context docBase=&quot;D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\server&quot; 
+path=&quot;&quot; reloadable=&quot;true&quot; 
+source=&quot;org.eclipse.jst.jee.server:server&quot;/&gt;
+</code></pre>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/lmitB0Gcz/" rel="tag">SpringBoot</a>	
+				 
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/mybatis-ni-xiang-gong-cheng-hou-bao-cuo-illegalargumentexception-result-maps-collection-already-contains-value-for-xxx/" rel="prev"> Mybatis逆向工程后报错IllegalArgumentException: Result Maps collection already contains value for xxx</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/myeclipse-dao-ru-spring-boot-de-shi-hou-ti-shi-bao-cuo-failure-to-transfer-orgcodehausplexusplexus-utilsjar3020/" rel="next"> myeclipse导入spring boot的时候提示报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>myeclipse导入spring boot的时候提示报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/eZzFMVACjGQdwNc.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">myeclipse导入spring boot的时候提示报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-01-29 00:41:06" itemprop="datePublished" pubdate="">2020-01-29</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,31 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<p>在网上找了很多方法都没有解决，其实导致这个报错的原因是因为网络差没有从maven官方仓库下载成功jar，尝试在在pom.xml文件中加上以下代码，成功解决。</p>
+<pre><code>&lt;dependency&gt;
+		&lt;groupId&gt;org.codehaus.plexus&lt;/groupId&gt;
+		&lt;artifactId&gt;plexus-utils&lt;/artifactId&gt;
+   	        &lt;version&gt;3.0.20&lt;/version&gt;
+&lt;/dependency&gt;
+</code></pre>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/lmitB0Gcz/" rel="tag">SpringBoot</a>	
+				 
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/springboot-xiang-mu-shi-yong-wai-bu-tomcat-fang-wen-wang-ye-chu-xian-404-wen-ti/" rel="prev"> SpringBoot项目使用外部Tomcat访问网页出现404问题</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/shi-yong-static-guan-jian-zi-guo-cheng-zhong-suo-yu-dao-de-wen-ti/" rel="next"> 使用static关键字过程中所遇到的问题</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

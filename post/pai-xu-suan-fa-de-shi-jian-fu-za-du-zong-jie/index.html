@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>排序算法的时间复杂度总结 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/JLOtiV5gBY2zIZf.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">排序算法的时间复杂度总结</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-01-11 16:27:47" itemprop="datePublished" pubdate="">2020-01-11</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,39 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
+				<p><strong>算法的效率主要由以下两个复杂度来评估：</strong><br>
+1、时间复杂度：评估执行程序所需的时间。可以估算出程序对处理器的使用程度。<br>
+2、空间复杂度：评估执行程序所需的存储空间。可以估算出程序对计算机内存的使用程度。</p>
+<ul>
+<li>冒泡排序。稳定的，平均时间复杂度为 O(n²)，最好时间复杂度那肯定就是一次循环 O(n)，最坏时间复杂度为 O(n²)。空间复杂度 O(1)。</li>
+<li>快速排序。不稳定，平均时间复杂度为O(nlogn)，最好的时间复杂度为O(nlogn)，最坏就是选定的基准值在最边上，这样就是O(n²)，注意哦，快排的空间复杂度平均是 O(logn)，最差 O(n)。</li>
+<li>简单选择排序。不稳定，平均、最好、最坏时间复杂度都为O(n²)。空间复杂度 O(1)。</li>
+<li>堆排序。不稳定，平均、最好、最坏的时间复杂度为O(nlogn)。空间复杂度 O(1)。</li>
+<li>直接插入排序。稳定。最好O(n)，平均、最坏时间复杂度O(n²)。空间复杂度 O(1)。</li>
+<li>希尔排序。不稳定。最好O(n)，平均O(n1.3)，最坏肯定是O(n²)。空间复杂度O(1)。</li>
+<li>归并排序。稳定。最好、最坏、最差时间复杂度O(nlogn)，空间复杂度O(n)。</li>
+<li>计数排序。稳定，空间换时间。适合数比较集中在一起的，这样k就少了，时间复杂度为 O(n+k)，空间复杂度也为O(n+k)。「把值放回去的时候可以放到原数组上则空间复杂度为O(k)」</li>
+<li>桶排序，桶越多，时间复杂度很简单，为O(n+k)，空间复杂度最坏为O(n+k)，其中 n 是因为桶内部所有元素得排序， k 是指桶的数量。</li>
+<li>基数排序，时间复杂度O(n*k)，k为最大数的位数，空间复杂度为O(n)。</li>
 </ul>
+<p><strong>Arrays.sort()底层</strong><br>
+<img src="https://i.loli.net/2020/05/14/CJuhZ19QMOS6FfG.png" alt="" loading="lazy"></p>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/shi-yong-static-guan-jian-zi-guo-cheng-zhong-suo-yu-dao-de-wen-ti/" rel="prev"> 使用static关键字过程中所遇到的问题</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/int-he-integer-de-qu-bie/" rel="next"> int和Integer的区别</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

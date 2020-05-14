@@ -1,0 +1,508 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
+<meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
+<meta HTTP-EQUIV="expires" CONTENT="0"> 
+<title>SpringBoot项目调优及垃圾回收器的比较 | PITT&#39;S BLOG</title>	
+
+<link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
+<script type="text/javascript">
+function getCSS()
+{
+        datetoday = new Date();
+        timenow=datetoday.getTime();
+        datetoday.setTime(timenow);
+        thehour = datetoday.getHours();
+
+            display = "https://pittttt.github.io/media/css/night.css";
+
+            display = "https://pittttt.github.io/media/css/night.css";   
+      
+            display = "https://pittttt.github.io/media/css/day.css";
+
+            display = "https://pittttt.github.io/media/css/day.css";
+      
+
+var css = '<';
+        css+='link rel="stylesheet" href='+display+' \/';
+        css+='>';
+        document.write(css);
+}
+</script>
+<link href="https://fonts.googleapis.com/css?family=Dancing+Script|Liu+Jian+Mao+Cao&display=swap" rel="stylesheet">
+<link href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css" rel="stylesheet" />
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<script type='text/javascript' src='https://pittttt.github.io/media/scripts/script.js'></script>
+<link href="https://cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet" />
+  <script src="https://cdn.bootcss.com/wow/1.1.2/wow.min.js"></script>
+  <script src="https://cdn.bootcss.com/highlight.js/9.15.8/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script>wow=new WOW({boxClass:'wow',animateClass:'animated',offset:0,mobile:true,live:true});wow.init();</script>
+
+<script type="text/javascript">
+window.onload=getCSS();
+</script>
+
+
+ 	
+</head>
+<body class="post-template-default single single-post postid-70 single-format-standard">
+    <div id="wrapper">
+        
+			
+		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/k5IQbs3qZzC8cDg.jpg)"
+		
+		>
+			<div class="site-branding">
+									<h1 class="site-title"><a href="https://pittttt.github.io" rel="home">PITT&#39;S BLOG</a></h1>
+										
+					<h2 class="site-description">所见即所得</h2>
+										
+							</div>
+			<nav id="nav-wrapper">
+				<div class="container">
+					<div class="nav-toggle">
+						<div class="bars">
+							<div class="bar"></div>
+							<div class="bar"></div>
+							<div class="bar"></div>
+						</div>
+					</div>
+					<div class="clear"></div>
+					<ul id="" class="dove">
+		 
+     			
+<li>
+	 
+	<a  href="/"> 首页</a></li>
+	
+    
+     			
+<li>
+	 
+	<a  href="/archives"> 归档</a></li>
+	
+    
+     			
+<li>
+	 
+	<a  href="/tags"> 标签</a></li>
+	
+    
+     			
+<li>
+	 
+	<a  href="/post/links"> 友链</a></li>
+	
+    
+
+</ul>
+</li>		
+		
+</ul>				</div>
+			</nav>
+						<div class="jingge">
+
+
+    
+
+    
+			
+<a  href="https://github.com/pittttt" target="_blank" ><i class="iconfont icon-github"></i></a>
+ 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        </header>
+
+		<div id="content" class="container">
+			<div class="row">
+	<div class="col-md-8 site-main">
+				
+<article id="post-70" class="post-70 post type-post status-publish format-standard hentry category-5 tag-10 tag-9 tag-11">
+
+	
+	                      
+		<div class="entry-content">
+			<h1 class="wow swing entry-title">SpringBoot项目调优及垃圾回收器的比较</h1>
+<div class="entry-meta">
+<div class="wow bounce">
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-04-02 23:47:16" itemprop="datePublished" pubdate="">2020-04-02</time></i>
+	          </div>
+			
+</span>
+													 
+		</div>
+                  
+			<div class="wow slideInLeft entry-summary song">
+				<h2 id="一-springboot项目在外部tomcat启动时加载两次">一、SpringBoot项目在外部Tomcat启动时加载两次</h2>
+<p>如下所示，spring标志出现两次(截取部分代码)</p>
+<pre><code> .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v1.5.7.RELEASE)
+
+2020-04-02 16:57:29.505  INFO 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : Starting MainApplication on LAPTOP-1U9EARRO with PID 19964 (D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\kill-0.0.1-SNAPSHOT\WEB-INF\classes started by pitt in C:\Users\pitt\AppData\Local\MyEclipse 2017 CI)
+2020-04-02 16:57:29.508 DEBUG 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : Running with Spring Boot v1.5.7.RELEASE, Spring v4.3.11.RELEASE
+2020-04-02 16:57:29.509  INFO 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : No active profile set, falling back to default profiles: default
+2020-04-02 16:57:29.539  INFO 19964 --- [ost-startStop-1] ationConfigEmbeddedWebApplicationContext : Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@1e20bc0d: startup date [Thu Apr 02 16:57:29 GMT+08:00 2020]; root of context hierarchy
+2020-04-02 16:57:30.097  INFO 19964 --- [ost-startStop-1] o.s.b.f.xml.XmlBeanDefinitionReader      : Loading XML bean definitions from class path resource [spring/spring-jdbc.xml]
+2020-04-02 16:57:30.141  WARN 19964 --- [ost-startStop-1] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.pitt.kill.model.mapper]' package. Please check your configuration.
+2020-04-02 16:57:30.258  WARN 19964 --- [ost-startStop-1] o.m.s.mapper.ClassPathMapperScanner      : No MyBatis mapper was found in '[com.pitt.kill.server]' package. Please check your configuration.
+2020-04-02 16:57:30.307  INFO 19964 --- [ost-startStop-1] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+
+  .   ____          _            __ _ _
+ /\\ / ___'_ __ _ _(_)_ __  __ _ \ \ \ \
+( ( )\___ | '_ | '_| | '_ \/ _` | \ \ \ \
+ \\/  ___)| |_)| | | | | || (_| |  ) ) ) )
+  '  |____| .__|_| |_|_| |_\__, | / / / /
+ =========|_|==============|___/=/_/_/_/
+ :: Spring Boot ::        (v1.5.7.RELEASE)
+
+2020-04-02 16:57:37.069  INFO 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : Starting MainApplication on LAPTOP-1U9EARRO with PID 19964 (D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\server\WEB-INF\classes started by pitt in C:\Users\pitt\AppData\Local\MyEclipse 2017 CI)
+2020-04-02 16:57:37.072 DEBUG 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : Running with Spring Boot v1.5.7.RELEASE, Spring v4.3.11.RELEASE
+2020-04-02 16:57:37.072  INFO 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : No active profile set, falling back to default profiles: default
+2020-04-02 16:57:37.102  INFO 19964 --- [ost-startStop-1] ationConfigEmbeddedWebApplicationContext : Refreshing org.springframework.boot.context.embedded.AnnotationConfigEmbeddedWebApplicationContext@1565ae71: startup date [Thu Apr 02 16:57:37 GMT+08:00 2020]; root of context hierarchy
+2020-04-02 16:57:37.675  INFO 19964 --- [ost-startStop-1] o.s.b.f.xml.XmlBeanDefinitionReader      : Loading XML bean definitions from class path resource [spring/spring-jdbc.xml]
+2020-04-02 16:57:37.863  INFO 19964 --- [ost-startStop-1] .s.d.r.c.RepositoryConfigurationDelegate : Multiple Spring Data modules found, entering strict repository configuration mode!
+2020-04-02 16:57:38.422  INFO 19964 --- [ost-startStop-1] trationDelegate$BeanPostProcessorChecker : Bean 'org.springframework.amqp.rabbit.annotation.RabbitBootstrapConfiguration' of type [org.springframework.amqp.rabbit.annotation.RabbitBootstrapConfiguration$$EnhancerBySpringCGLIB$$6cdea02f] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+2020-04-02 16:57:38.456  INFO 19964 --- [ost-startStop-1] trationDelegate$BeanPostProcessorChecker : Bean 'shiroConfig' of type [com.pitt.kill.server.config.ShiroConfig$$EnhancerBySpringCGLIB$$4392bed0] is not eligible for getting processed by all BeanPostProcessors (for example: not eligible for auto-proxying)
+</code></pre>
+<p>加载时间30s</p>
+<pre><code>2020-04-02 16:57:42.825  INFO 19964 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : Started MainApplication in 6.091 seconds (JVM running for 30.348)
+2020-04-02 16:57:42.946  INFO 19964 --- [           main] org.apache.catalina.startup.Catalina     : Server startup in 29361 ms
+</code></pre>
+<p>原因：打开配置文件server.xml，Tomcat在启动web项目时，会首先在Host标签中找webapps下的项目，进行加载后，又会在Context 标签中再次加载，导致加载两次<br>
+<mark>解决:</mark> 将appBase=&quot;webapps&quot;替换为appBase = &quot; &quot;</p>
+<pre><code class="language-bash">&lt;Host appBase=&quot;webapps&quot; autoDeploy=&quot;true&quot; name=&quot;localhost&quot; unpackWARs=&quot;true&quot;&gt;
+</code></pre>
+<pre><code class="language-bash">&lt;Context docBase=&quot;D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\server&quot; path=&quot;&quot; reloadable=&quot;true&quot; source=&quot;org.eclipse.jst.jee.server:server&quot;/&gt;
+</code></pre>
+<p>加载一次时间为12s</p>
+<pre><code>2020-04-02 17:03:12.759  INFO 952 --- [ost-startStop-1] com.pitt.kill.server.MainApplication     : Started MainApplication in 7.478 seconds (JVM running for 12.532)
+2020-04-02 17:03:13.100  INFO 952 --- [           main] org.apache.catalina.startup.Catalina     : Server startup in 11772 ms
+</code></pre>
+<h2 id="二-禁用字节码验证过程">二、禁用字节码验证过程</h2>
+<p>对类的加载时间进行优化，首先查看类的加载时间</p>
+<pre><code class="language-bash">C:\Program Files\Java\jdk1.8.0_211\bin&gt;jps
+16612 QuorumPeerMain
+9172 Main
+19416 MyEclipse
+952 Bootstrap
+19580 Jps
+
+C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -class 952
+Loaded  Bytes  Unloaded  Bytes     Time
+ 10533 20062.0        0     0.0       7.83
+</code></pre>
+<p>我们默认通过MyEclipse编译的代码是可靠的，不需要在加载的时候进行字节码验证，使用-Xverify:none参数将字节码验证过程禁用掉，来提升类的加载速度</p>
+<pre><code class="language-bash">C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -class 12308
+Loaded  Bytes  Unloaded  Bytes     Time
+  9822 18874.2        0     0.0       6.70
+</code></pre>
+<p>提升效果一般，只减少了1s<br>
+此外由于HotSpot采用了JIT编译器可以提前加载热代码，1.8版本JVM的代码编译速度已经比较优秀，此处不做优化</p>
+<h2 id="三-调整内存设置控制垃圾收集频率">三、调整内存设置控制垃圾收集频率</h2>
+<p>Java8默认的GC回收器为Parallel Scavenge + Parallel Old<br>
+<img src="https://img-blog.csdnimg.cn/202004030002075.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+用Jmeter发送请求作为辅助测试<br>
+可以看到，测试时间内，发起了103次Minor GC，耗时不到1s，其实时间停顿并不多，但是5次Full GC占用了很大部分的GC时间，主要针对这部分时间进行优化。通过-Xloggc:gc.log -XX:+PrintGCTimeStamps -XX:+PrintGCDetails参数打印GC日志，将Full GC挑出如下：</p>
+<pre><code>7.934: [Full GC (Metadata GC Threshold) [PSYoungGen: 926K-&gt;0K(647680K)] [ParOldGen: 54198K-&gt;15711K(65024K)] 55125K-&gt;15711K(712704K), [Metaspace: 20674K-&gt;20674K(1069056K)], 0.0303162 secs] [Times: user=0.03 sys=0.00, real=0.03 secs] 
+10.430: [Full GC (Metadata GC Threshold) [PSYoungGen: 3883K-&gt;0K(646656K)] [ParOldGen: 20986K-&gt;17184K(80896K)] 24870K-&gt;17184K(727552K), [Metaspace: 34377K-&gt;34377K(1081344K)], 0.0413074 secs] [Times: user=0.28 sys=0.00, real=0.04 secs] 
+379.971: [Full GC (Metadata GC Threshold) [PSYoungGen: 2528K-&gt;0K(93696K)] [ParOldGen: 65885K-&gt;58730K(132096K)] 68413K-&gt;58730K(225792K), [Metaspace: 57642K-&gt;57535K(1101824K)], 0.3908541 secs] [Times: user=0.97 sys=0.00, real=0.39 secs] 
+390.977: [Full GC (Ergonomics) [PSYoungGen: 8688K-&gt;0K(230400K)] [ParOldGen: 129221K-&gt;120704K(226304K)] 137909K-&gt;120704K(456704K), [Metaspace: 62151K-&gt;62115K(1105920K)], 0.1319683 secs] [Times: user=0.50 sys=0.02, real=0.13 secs] 
+553.770: [Full GC (Ergonomics) [PSYoungGen: 47104K-&gt;0K(513536K)] [ParOldGen: 228052K-&gt;120789K(249344K)] 275156K-&gt;120789K(762880K), [Metaspace: 62330K-&gt;62330K(1105920K)], 0.1344527 secs] [Times: user=0.27 sys=0.02, real=0.13 secs] 
+</code></pre>
+<p>每一次Full GC都伴随着老年代的扩容，日志还显示有时候内存回收状况不理想，获取可用的内存主要通过空间的扩容。<br>
+查看运行期间的CPU使用情况，如下图：<br>
+<img src="https://img-blog.csdnimg.cn/20200403000356479.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+垃圾回收的CPU使用率曲线几乎看不到，CPU资源还有可利用的余地，为此想到更换原有的垃圾回收器来进行GC优化</p>
+<p><strong>CMS:</strong><br>
+相比于默认的Parallel GC明显改善了Full GC所消耗的时间，Stop The World时间减少，但是Minor GC大量增加，尝试调整新生代的大小来减少Minor GC的产生，在使用-XX:NewRatio=1 -XX:SurvivorRatio=3<br>
+-XX:+UseConcMarkSweepGC -XX:CMSInitiatingOccupancyFraction=85参数进行调整后，Minor GC数量下降，但是相比而言还是很多<br>
+<img src="https://img-blog.csdnimg.cn/20200402231900903.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<strong>G1:</strong><br>
+G1为最新的垃圾回收算法，将新生代和老年代同时进行标记和回收，采用标记-整理算法，不会产生内存碎片，在时间消耗上表现的最好，平均每次回收占用的时间最短，并且最好在内存比较大的机器上使用G1算法进行回收<br>
+<img src="https://img-blog.csdnimg.cn/20200402233250733.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<strong>G1的优势在于:</strong><br>
+作为CMS的长期替代品<br>
+1、G1是一个压缩收集器，提供足够强的压缩来完全避免狭小的内存分配<br>
+2、依赖Regions概念，大大简化收集器逻辑，大部分情况下规避潜在的内存碎片问题<br>
+3、比CMS的GC停顿时长更加可预测，并允许用户指定停顿时长</p>
+<p><strong>总结:</strong><br>
+以上三种回收器都为多线程垃圾回收器，但是对于不同的环境，应该具体问题具体分析，而不是采用一刀切的方法，解决问题的过程即为寻找最优解的过程。</p>
+
+							</div>
+	<div class="wow bounceInDown vt-post-tags">
+ 
+				<a href="https://pittttt.github.io/tag/hRDXgQ1Mf/" rel="tag">JVM</a>	
+				 
+				<a href="https://pittttt.github.io/tag/lmitB0Gcz/" rel="tag">SpringBoot</a>	
+				 
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
+					</div>						
+<nav class="navigation3 post-navigation3" role="navigation">
+		
+		<div class="nav-links3">
+      
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/leetcode-bu-tong-lu-jing-de-liang-chong-bp-jie-fa/" rel="prev"> leetcode不同路径的两种BP解法</a></div>
+		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/cha-kan-java-cheng-xu-dui-nei-cun-deng-ming-ling-he-jvm-ke-shi-hua-gong-ju/" rel="next"> 查看java程序堆内存等命令和jvm可视化工具</a></div>
+		
+		</div>
+	</nav>
+	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">
+	<div class="author-avatar pull-left"><img src="https://pittttt.github.io/images/avatar.png" ></div>
+ 
+
+		</div>
+		
+ 
+		
+</article>
+
+<div id="marlin_lite_about_widget-2" class="wow bounceInUp widget marlin_lite_about_widget" data-wow-delay="0.1s">
+		
+        
+		<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='https://pittttt.github.io/media/scripts/Valine.min.js'></script>
+
+<div class="comment"></div>
+<script>
+        new Valine({
+            // AV 对象来自上面引入av-min.js(老司机们不要开车➳♡゛扎心了老铁)
+            av: AV, 
+            el: '.comment',
+            lang: 'zh-cn',
+            
+            admin_email:'779139212@qq.com',
+            
+            
+            emoticon_url: 'https://cloud.panjunwen.com/alu',
+             
+      emoticon_list: ["吐.png","喷血.png","狂汗.png","不说话.png","汗.png","坐等.png","献花.png","不高兴.png","中刀.png","害羞.png","皱眉.png","小眼睛.png","中指.png","尴尬.png","瞅你.png","想一想.png","中枪.png","得意.png","肿包.png","扇耳光.png","亲亲.png","惊喜.png","脸红.png","无所谓.png","便便.png","愤怒.png","蜡烛.png","献黄瓜.png","内伤.png","投降.png","观察.png","看不见.png","击掌.png","抠鼻.png","邪恶.png","看热闹.png","口水.png","抽烟.png","锁眉.png","装大款.png","吐舌.png","无奈.png","长草.png","赞一个.png","呲牙.png","无语.png","阴暗.png","不出所料.png","咽气.png","期待.png","高兴.png","吐血倒地.png","哭泣.png","欢呼.png","黑线.png","喜极而泣.png","喷水.png","深思.png","鼓掌.png","暗地观察.png"],
+     
+      app_id: 'Y2x5OfGlNb2USfogG2CRa2zu-gzGzoHsz',
+      	
+      
+      app_key: 'zlQarf9A4jhvrRxyCn7w12Wb',
+         	
+          
+      placeholder: 'Your comments and criticisms are always welcome.'
+       
+        });
+    </script> 
+
+
+   
+  
+ 
+
+		</div>
+
+			</div>
+			
+
+
+<div class="tocc col l3 hide-on-med-and-down">
+	
+        <div class="toc-widget">
+			
+            <div class="toc-title"></div>
+			
+            <div id="toc-content">
+			
+			
+			</div>
+        </div>
+    </div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.5.0/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '.entry-summary',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            // headingsOffset: -205,
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('.entry-summary').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+    });
+</script>										 
+
+ 
+       
+
+
+			</div>
+		</div>
+
+		
+		 	<footer id="colophon" class="site-footer">
+
+			<div class="container">
+	
+				<div class="copyright">COPYRIGHT © 2020 <a href="https://pittttt.github.io" target="_blank">PITT</a><br>
+Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a><br>Theme:   <a href="https://github.com/shanbufun/gridea-theme-pan" target="_blank" title="Pan"><span>Pan</span></a>.  by <a href="https://shanbu.fun/" target="_blank"  title="山卜方" >Shanbufun</a></div>		
+			</div>
+		
+		</footer>
+
+</div>
+
+<script src="https://cdn.bootcss.com/fitvids/1.2.0/jquery.fitvids.min.js"></script>
+<script type='text/javascript' src='https://pittttt.github.io/media/scripts/marlin-scripts.js'></script>
+ <script src="//tokinx.github.io/lately/lately.min.js"></script>
+  <script>jQuery(document).ready(function(){$.lately({'target':'.lately-a,.lately-b,.lately-c'})});</script>
+  <style type="text/css">a.back_to_top {
+    text-decoration: none;
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    background: #f0f0f0;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    line-height: 36px;
+    font-size: 18px;
+    text-align: center;
+    transition-duration: .5s;
+    transition-propety: background-color;
+    display: none;
+}
+
+a.back_to_top span {
+    color: #888;
+}
+
+a.back_to_top:hover {
+    cursor: pointer;
+    background: #dfdfdf;
+}
+
+a.back_to_top:hover span {
+    color: #555;
+}
+
+@media print, screen and (max-width: 580px) {
+    .back_to_top {
+        display: none !important;
+    }
+}
+
+
+
+</style><a id="back_to_top" href="#" class="back_to_top"><span><i class="iconfont icon-xiangshang"></i></span>
+</a>
+
+
+<script>$(document).ready((function(_this) {
+  return function() {
+    var bt;
+    bt = $('#back_to_top');
+    if ($(document).width() > 480) {
+      $(window).scroll(function() {
+        var st;
+        st = $(window).scrollTop();
+        if (st > 30) {
+          return bt.css('display', 'block');
+        } else {
+          return bt.css('display', 'none');
+        }
+      });
+      return bt.click(function() {
+        $('body,html').animate({
+          scrollTop: 0
+        }, 800);
+        return false;
+      });
+    }
+  };
+})(this));
+</script>
+
+		<script data-no-instant>
+    (function ($) {
+        $.extend({
+            adamsOverload: function () {
+                $('.navigation:eq(0)').remove();
+                $("").attr("rel" , "external");
+                $("a[rel='external'],a[rel='external nofollow']").attr("target","_blank");
+                $("a.vi").attr("rel" , "");
+                $.viewImage({
+                    'target'  : 'img',
+                    'exclude' : '.vsmile-icons img,.gallery img',
+                    'delay'   : 300
+                });
+                $.lately({
+                    'target' : '.commentmetadata a,.infos time,.post-list time'
+                });
+                prettyPrint();
+                
+                $('ul.links li a').each(function(){
+                    if($(this).parent().find('.bg').length==0){
+                        $(this).parent().append('<!---<div class="bg" style="background-image:url(https://c3.glgoo.top/s2/favicons?domain='+$(this).attr("href")+')"></div>--->')
+                    }
+                });
+            }
+        });
+    })(jQuery);
+    jQuery.adamsOverload();
+</script>
+
+</body>
+</html>

@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>通过exe4j将jar打包成exe(可以在没有jdk的电脑上运行）及程序文件的精简 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/pWZ6ea8UNiMbHmP.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">通过exe4j将jar打包成exe(可以在没有jdk的电脑上运行）及程序文件的精简</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-06-20 20:30:44" itemprop="datePublished" pubdate="">2019-06-20</time></i>
 	          </div>
 			
 </span>
@@ -155,22 +157,60 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<p><strong>概述：</strong> java运行是需要环境的，如果在没有配置jdk环境电脑那怎么运行？自带jre环境。为了安全问题一般会将jar打包成exe文件，jar是可以被反编译的。其二打包exe方便后期打包成安装包</p>
+<h2 id="1-先决条件">1、先决条件</h2>
+<p>需要一个打包的jar （一般打包都是Swing做出界面）<br>
+下载安装好exe4j<br>
+需要下载jre或jdk包</p>
+<h2 id="2做一个打包jar">2.做一个打包jar</h2>
+<p>这里为了方便采用eclipse导入jar的功能：<br>
+<img src="https://img-blog.csdnimg.cn/20190620201118536.png" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/2019062020112797.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620201142560.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<h2 id="3准备工作">3.准备工作</h2>
+<p>新建一个文件夹tool（例如：D:\JackWork\tool），然后将用到配置文件和图片相关资源放入到该目录下把刚刚导出的jar也放入到tool文件夹下，这里还包括jre或jdk环境<br>
+<img src="https://img-blog.csdnimg.cn/20190620201335697.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<h2 id="4开始配置">4.开始配置</h2>
+<p>打开安装好exe4j软件<br>
+<img src="https://img-blog.csdnimg.cn/20190620201412548.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620201427808.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620201444507.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/2019062020150884.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<h4 id="注意在这里要进行64位程序设置">注意！！！在这里要进行64位程序设置</h4>
+<figure data-type="image" tabindex="1"><img src="https://img-blog.csdnimg.cn/20190620201859753.png" alt="在这里插入图片描述" loading="lazy"></figure>
+<h4 id="特别注意也就是加载添加jar必须要用相对路径不然在其他机器上不能用也就是将djackworktooltooljar-改为-tooljar">特别注意：也就是加载添加jar必须要用相对路径，不然在其他机器上不能用，也就是将D:\JackWork\tool\tool.jar 改为： tool.jar</h4>
+<figure data-type="image" tabindex="2"><img src="https://img-blog.csdnimg.cn/20190620201906631.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></figure>
+<h4 id="特别注意要将打包的jar和程序引用的jar都放进去如下图中的jrt-fsjar为程序调用jar象棋jar则是程序输出jar">特别注意要将打包的jar和程序引用的jar都放进去，如下图中的jrt-fs.jar为程序调用jar，象棋.jar则是程序输出jar</h4>
+<p><img src="https://img-blog.csdnimg.cn/20190620202424167.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620201932172.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620202447209.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+此处将这三个删除，并添加下图jre文件，jre要和程序文件放在一个文件夹中<br>
+<img src="https://img-blog.csdnimg.cn/20190620202520290.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/2019062020274667.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/2019062020282022.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620202826147.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620202918842.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+<img src="https://img-blog.csdnimg.cn/20190620202936346.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"></p>
+<h2 id="程序文件的精简">程序文件的精简</h2>
+<p>现在所使用的的jre库有200多M，所以我们对它进行精简，jre同时也是使程序能在不带jdk环境运行的电脑上运行的原因。<br>
+打开程序后，尝试删除BIN目录下的所有文件。因为程序正在运行，占用需要的EXE或者DLL所以，只会删除不需要的文件。但是，这时要注意尽量不要删除exe后缀的文件，可能与虚拟机运行有关。<br>
+lib目录下的精简暂时没学会，需要运用代码对rt.jar文件进行精简。</p>
+<blockquote>
+<p>搬运自个人的CSDN博客——&gt;<a href="https://blog.csdn.net/Pitt_96/article/details/93123360">传送门</a></p>
+</blockquote>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/int-he-integer-de-qu-bie/" rel="prev"> int和Integer的区别</a></div>
+		 
 		 
 		</div>
 	</nav>

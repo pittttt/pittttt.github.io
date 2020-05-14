@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>int和Integer的区别 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/jQAIaXCG1oFcwlv.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">int和Integer的区别</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-06-20 20:43:05" itemprop="datePublished" pubdate="">2019-06-20</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,70 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<p><strong>int和Integer的区别</strong><br>
+1、Integer是int的包装类，int则是java的一种基本数据类型<br>
+2、Integer变量必须实例化后才能使用，而int变量不需要<br>
+3、Integer实际是对象的引用，当new一个Integer时，实际上是生成一个指针指向此对象；而int则是直接存储数据值<br>
+4、Integer的默认值是null，int的默认值是0<br>
+<strong>延伸：</strong><br>
+关于Integer和int的比较<br>
+<mark>这里区分 == 的两种使用情况</mark><br>
+1、由于i变量实际上是对一个Integer对象的引用，所以两个通过new生成的Integer对象内存地址是不相等的。<br>
+<mark>对于引用类型 == 比较内存地址</mark></p>
+<pre><code class="language-java">Integer i = new Integer(100);
+Integer j = new Integer(100);
+System.out.print(i == j); //false
+</code></pre>
+<p>2、Integer类型和int类型比较时，只要两个变量的值是相同的，则结果为true（因为包装类Integer和基本数据类型int比较时，会自动拆包装为int，然后进行比较，实际上就变为两个int变量的比较）<br>
+<mark>此时为基本数据类型的比较， == 比较值是否相同</mark></p>
+<pre><code class="language-java">Integer i = new Integer(100);
+int j = 100；
+System.out.print(i == j); //true
+</code></pre>
+<p>3、非new生成的Integer变量和new Integer()生成的变量比较时，结果为false。（因为非new生成的Integer变量指向的是java常量池中的对象，而new Integer()生成的变量指向堆中新建的对象，两者在内存中的地址不同）</p>
+<pre><code class="language-java">Integer i = new Integer(100);
+Integer j = 100;
+System.out.print(i == j); //false
+</code></pre>
+<p>4、对于两个非new生成的Integer对象，进行比较时，如果两个变量的值在区间-128到127之间，则比较结果为true，如果两个变量的值不在此区间，则比较结果为false</p>
+<pre><code class="language-java">Integer i = 100;
+Integer j = 100;
+System.out.print(i == j); //true
+Integer i = 128;
+Integer j = 128;
+System.out.print(i == j); //false
+</code></pre>
+<p>原因如下：<br>
+java在编译Integer i = 100 ;时，会翻译成为Integer i = Integer.valueOf(100)；，而java API中对Integer类型的valueOf的定义如下：</p>
+<pre><code class="language-java">public static Integer valueOf(int i){
+    assert IntegerCache.high &gt;= 127;
+    if (i &gt;= IntegerCache.low &amp;&amp; i &lt;= IntegerCache.high){
+        return IntegerCache.cache[i + (-IntegerCache.low)];
+    }
+    return new Integer(i);
+}
+</code></pre>
+<p>java对于-128到127之间的数，会进行缓存，下次就会直接从缓存中取，就不会new一个新对象</p>
+<p><strong>此处判断引用类型的“值”是否相同，如Long、String类型等，最稳妥的方法为使用equals()方法</strong></p>
+<blockquote>
+<p>参考：https://www.cnblogs.com/guodongdidi/p/6953217.html</p>
+</blockquote>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/pai-xu-suan-fa-de-shi-jian-fu-za-du-zong-jie/" rel="prev"> 排序算法的时间复杂度总结</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/tong-guo-exe4j-jiang-jar-da-bao-cheng-exeke-yi-zai-mei-you-jdk-de-dian-nao-shang-yun-xing-ji-cheng-xu-wen-jian-de-jing-jian/" rel="next"> 通过exe4j将jar打包成exe(可以在没有jdk的电脑上运行）及程序文件的精简</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>leetcode不同路径的两种BP解法 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/AT5jprM26GEcHdl.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">leetcode不同路径的两种BP解法</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-04-15 15:49:28" itemprop="datePublished" pubdate="">2020-04-15</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,99 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
-</ul>
+				<p><strong>题目如下：</strong><br>
+一个机器人位于一个 m x n 网格的左上角 （起始点在下图中标记为“Start” ）。</p>
+<p>机器人每次只能向下或者向右移动一步。机器人试图达到网格的右下角（在下图中标记为“Finish”）。</p>
+<p>现在考虑网格中有障碍物。那么从左上角到右下角将会有多少条不同的路径？<br>
+输入：<br>
+[<br>
+[0,0,0],<br>
+[0,1,0],<br>
+[0,0,0]<br>
+]<br>
+输出: 2</p>
+<p>来源：<a href="https://leetcode-cn.com/problems/unique-paths-ii">leetcode63.不同路径II</a><br>
+<img src="https://img-blog.csdnimg.cn/20200415145234122.png" alt="在这里插入图片描述" loading="lazy"><br>
+这道题采用经典的BP解法，但是在实现BP时，我一开始采用了和<a href="https://leetcode-cn.com/problems/unique-paths/">leetcode62.不同路径</a>同样的递归实现，62可以通过全部测试用例，此题代码如下：</p>
+<pre><code class="language-java">class Solution {
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        long[][] cache=new long[obstacleGrid.length][obstacleGrid[0].length];
+        return (int)dp(obstacleGrid,0,0,cache,0);
+    }
+    
+    public long dp(int[][] obstacleGrid,int x,int y,long[][] cache,int n){
+    	//如果能走到右下角
+        if(n==obstacleGrid.length+obstacleGrid[0].length-2&amp;&amp;x==obstacleGrid.length-1&amp;&amp;y==obstacleGrid[0].length-1&amp;&amp;obstacleGrid[x][y]==0){
+            return 1;
+        //越界或者碰到障碍
+        }else if(x&gt;=obstacleGrid.length||y&gt;=obstacleGrid[0].length||obstacleGrid[x][y]==1){
+            return 0;
+        }
+        if(cache[x][y]!=0) return cache[x][y];
+        cache[x][y]=dp(obstacleGrid,x+1,y,cache,n+1)+dp(obstacleGrid,x,y+1,cache,n+1);
+        return cache[x][y];
+    }
+}
+</code></pre>
+<p>虽然使用了缓存数组来储存每步结果，但是还是超时了<img src="https://img-blog.csdnimg.cn/20200415150052573.png?x-oss-process=image/watermark,type_ZmFuZ3poZW5naGVpdGk,shadow_10,text_aHR0cHM6Ly9ibG9nLmNzZG4ubmV0L1BpdHRfOTY=,size_16,color_FFFFFF,t_70" alt="在这里插入图片描述" loading="lazy"><br>
+使用了BP Table数组最后通过</p>
+<pre><code class="language-java">class Solution {
+    public int uniquePathsWithObstacles(int[][] obstacleGrid) {
+        if(obstacleGrid==null||obstacleGrid.length&lt;0){
+            return 0;
+        }
+        int rows=obstacleGrid.length;
+        int cols=obstacleGrid[0].length;
+        //dp数组的含义为可以到达这个坐标，则路径数为1，下一个坐标等于前两个坐标之和
+        int[][] dp=new int[rows][cols];
+        //进行初始化，只有向右和向下两个方向，则障碍物后面的都不能可以走
+        for(int i=0;i&lt;cols;i++){
+            if(obstacleGrid[0][i]==1){
+                break;
+            }else{
+                dp[0][i]=1;
+            }
+        }
+        for(int i=0;i&lt;rows;i++){
+            if(obstacleGrid[i][0]==1){
+                break;
+            }else{
+                dp[i][0]=1;
+            }
+        }
+        //从1开始，防止下标越界
+        for(int i=1;i&lt;rows;i++){
+            for(int j=1;j&lt;cols;j++){
+                if(obstacleGrid[i][j]==1){
+                    dp[i][j]=0;
+                }else{
+                    dp[i][j]=dp[i-1][j]+dp[i][j-1];
+                }
+            }
+        }
+        return dp[rows-1][cols-1];
+    }
+}
+</code></pre>
+<p>虽然都是BP算法，原因可能是因为递归深度太大，导致超时，BP Table的适用范围更广</p>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/mQHiMVVWv/" rel="tag">算法</a>	
+				 
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/zhao-shang-yin-xing-2020fintech-jing-ying-xun-lian-ying-bi-shi-ti-mu-ti-jie/" rel="prev"> 招商银行2020FinTech精英训练营笔试题目题解</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/springboot-xiang-mu-diao-you-ji-la-ji-hui-shou-qi-de-bi-jiao/" rel="next"> SpringBoot项目调优及垃圾回收器的比较</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

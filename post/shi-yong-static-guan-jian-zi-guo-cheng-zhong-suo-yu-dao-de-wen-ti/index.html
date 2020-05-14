@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>友链 | PITT&#39;S BLOG</title>	
+<title>使用static关键字过程中所遇到的问题 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/oO6gx28IWsyUKfM.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">友链</h1>
+			<h1 class="wow swing entry-title">使用static关键字过程中所遇到的问题</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2019-05-14 13:39:51" itemprop="datePublished" pubdate="">2019-05-14</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-01-15 14:27:08" itemprop="datePublished" pubdate="">2020-01-15</time></i>
 	          </div>
 			
 </span>
@@ -155,23 +157,132 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<ul class="links">
-<center>
-<li><a href="https://blog.csdn.net/Pitt_96" target="_blank" rel="noopener noreferrer">pitt's CSDNblog</a></li>
-</center>
-<center>
-<li><a href="http://39.99.146.207:8090/" target="_blank" rel="noopener noreferrer">另一个个人博客</a></li>
-</center>
+				<p>在进行队列实现基数排序的练习中发现之前对static关键字理解不清晰<br>
+下面为代码:</p>
+<pre><code class="language-java">public class MyQueue {
+
+	static int[] elements;
+
+	public MyQueue() {
+		elements = new int[0];
+	}
+
+	// 入队
+	public void add(int value) {
+		// 创建一个新的数组
+		int[] newArray = new int[elements.length + 1];
+		// 将元素复制过去
+		for (int i = 0; i &lt; elements.length; i++) {
+			newArray[i] = elements[i];
+		}
+		newArray[elements.length] = value;
+		elements = newArray;
+	}
+
+	// 出队
+	public int poll() {
+		if (elements.length == 0) {
+			throw new RuntimeException(&quot;queue is empty&quot;);
+		}
+		int element = elements[0];
+		// 创建一个新的数组
+		int[] newArr = new int[elements.length - 1];
+		for (int i = 0; i &lt; newArr.length; i++) {
+			newArr[i] = elements[i + 1];
+		}
+		elements = newArr;
+		return element;
+	}
+
+	// 判断是否为空
+	public boolean isEmpty() {
+		return elements.length == 0;
+	}
+
+}
+</code></pre>
+<pre><code class="language-java">import java.util.Arrays;
+
+public class RadixQueueSort {
+	public static void main(String[] args) {
+		int[] arr = new int[] { 12, 234, 5, 89, 55, 3, 348, 198, 5, 653, 22, 77, 832 };
+		System.out.println(Arrays.toString(arr));
+		radixQueueSort(arr);
+		System.out.println(Arrays.toString(arr));
+	}
+
+	// 通过队列来实现
+	public static void radixQueueSort(int[] arr) {
+		// 取出数组中最大的数
+		int max = Integer.MIN_VALUE;
+		for (int num : arr) {
+			if (num &gt; max) {
+				max = num;
+			}
+		}
+		// 通过最大的数的位数来判断需要进行几次循环
+		int maxn = (max + &quot;&quot;).length();
+		// 建立10个队列数组
+		MyQueue[] myQueue = new MyQueue[10];
+		// 初始化每个队列
+		for (int t = 0; t &lt; myQueue.length; t++) {
+			myQueue[t] = new MyQueue();
+		}
+		for (int i = 0, n = 1; i &lt; maxn; i++, n *= 10) {
+			// 取出每个数的个、十、百、千位数...
+			for (int j = 0; j &lt; arr.length; j++) {
+				// 计算余数
+				int ys = arr[j] / n % 10;
+				myQueue[ys].add(arr[j]);
+			}
+
+			// 将分好的数取出来放回去
+			int index = 0;
+			for (int k = 0; k &lt; myQueue.length; k++) {
+				while (!myQueue[k].isEmpty()) {
+					arr[index] = myQueue[k].poll();
+					// System.out.println(myQueue[k].poll());
+					index++;
+				}
+			}
+		}
+	}
+}
+</code></pre>
+<p>发现在MyQueue类中的int数组不小心加了static关键字<code>static int[] elements;</code><br>
+导致RadixQueueSort类中的以下代码无效：</p>
+<pre><code class="language-java">// 建立10个队列数组
+MyQueue[] myQueue = new MyQueue[10];
+</code></pre>
+<p>从而导致排序算法失效，在此对static关键字进行总结：</p>
+<hr>
+<ul>
+<li>static关键字修饰的静态方法表示当前类的唯一实例，也就是说在整个java项目中这个方法是唯一的。</li>
 </ul>
+<p>如果static修饰了数组如：<code>static int[] elements;</code></p>
+<ul>
+<li>不管这个类有多少个对象，这个数组都只有一个，即在整个内存中只有一份数据，可以改变，但有且只有一个，并且在main()程序开始之前就已经完成分配，并且可以访问，直到程序结束才释放</li>
+</ul>
+<hr>
+<blockquote>
+<p>搬运自个人的CSDN博客——&gt;<a href="https://blog.csdn.net/Pitt_96/article/details/93123360">传送门</a></p>
+</blockquote>
+
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/myeclipse-dao-ru-spring-boot-de-shi-hou-ti-shi-bao-cuo-failure-to-transfer-orgcodehausplexusplexus-utilsjar3020/" rel="prev"> myeclipse导入spring boot的时候提示报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20</a></div>
 		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/pai-xu-suan-fa-de-shi-jian-fu-za-du-zong-jie/" rel="next"> 排序算法的时间复杂度总结</a></div>
+		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

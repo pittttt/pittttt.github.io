@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>招商银行2020FinTech精英训练营笔试题目题解 | PITT&#39;S BLOG</title>	
+<title>我的观影史 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,8 +55,6 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
-		
-		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/5FQ8UEytq9Pr2BT.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -146,10 +144,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">招商银行2020FinTech精英训练营笔试题目题解</h1>
+			<h1 class="wow swing entry-title">我的观影史</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-05-10 23:25:40" itemprop="datePublished" pubdate="">2020-05-10</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="1996-08-03 12:00:00" itemprop="datePublished" pubdate="">1996-08-03</time></i>
 	          </div>
 			
 </span>
@@ -157,181 +155,40 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<p>笔试题目为招商银行2020FinTech精英训练营笔试题目，都没有AC，记录一下，还是要多做题多进行总结</p>
-<p><strong>题目一描述:</strong>  小招在玩一款游戏：在一个N层高的金字塔上，以金字塔顶为第一层，第i层有i个落点，每个落点有若干枚金币，在落点可以跳向左斜向下或向右斜向下的落点。若知道金字塔的层数N及每层的金币数量分布，请计算小招在本次游戏中可以获得的最多金币数量。<br>
-<strong>测试输入：</strong> 第一行输入为层数<br>
-5<br>
-8<br>
-3 8<br>
-8 1 0<br>
-4 7 5 4<br>
-3 5 2 6 5<br>
-<strong>测试输出：31</strong><br>
-此题为典型的DP题目，一开始我使用递归遍历所有和，结果超时了，下面为标准解法：</p>
-<pre><code class="language-java">public static void main(String[] args) {
-		Scanner in = new Scanner(System.in);
-		int n = in.nextInt();
-		int[][] a = new int[1024][1024];//可以通过题目限制条件，如N&lt;=1024来设定数组大小
-		//将金字塔存入二维数组
-		for (int i = 1; i &lt; n + 1; i++) {
-			for (int j = 0; j &lt; i; j++) {
-				a[i][j] = in.nextInt();
-			}
-		}
-		//从低向上计算，通过下面一层计算当前层的最大和
-		for (int i = n - 1; i &gt;= 1; i--) {
-			for (int j = 0; j &lt; i; j++) {
-				a[i][j] += Math.max(a[i + 1][j], a[i + 1][j + 1]);
-			}
-		}
-		System.out.println(a[1][0]);
-	}
-</code></pre>
-<p><mark>动态规划的精髓在于由底向上的进行计算来确保此时所得到的一定是最大值，从全局所有情况开始考虑，逐渐收束到最大值，而不是由上向下的做选择，因为选择后面的情况无法预料，每次需要递归到最后，导致递归的时间复杂度过大，可以理解为一种逆向计算过程</mark></p>
-<p><strong>题目二描述:</strong> 在一场集体婚礼上，有n对新人需要坐在连续排列的 2n个座位上合影，同一对新人彼此挨着。由于进场时各对新人并未按序入座，请计算最少交换座位的次数，以便使每对新人均可并肩坐在一起。一次交换可选择任意两人，让他们互换座位。<br>
-全部新人的序号可用 0 到 2n-1 的整数表示，第一对是 (0, 1)，第二对是 (2, 3)，以此类推，最后一对是 (2n-2, 2n-1)。<br>
-row[i]指最初坐在第 i 个座位上的新人编号，i是从0到（2n-1）的一个升序全排列，row不存在重复值。<br>
-<strong>测试输入：</strong> 第一行为n，即共有多少对新人(2≤n≤100000 )，第二行为row，即2n个座位上的初始新人编号。<br>
-2<br>
-0 2 1 3<br>
-<strong>测试输出：1</strong></p>
-<pre><code class="language-java">public class Main {
-    public static void main(String[] args) {
-        Scanner sc = new Scanner(System.in);
-        while (sc.hasNext()){
-            int n = sc.nextInt();
-            int[] arr = new int[2*n];
-            for(int i=0; i&lt;2*n; i++){
-                arr[i] = sc.nextInt();
-            }
-            int count = helper(arr);
-            System.out.println(count);
-        }
-    }
-    public static int helper(int[] row) {
-        int count = 0;
-        for (int i = 0; i &lt; row.length; i += 2) {
-            int x = row[i];
-            if (row[i+1] == (x ^ 1)) continue;
-            count++;
-            for (int j = i+1; j &lt; row.length; ++j) {
-                if (row[j] == (x^1)) {
-                    row[j] = row[i+1];
-                    row[i+1] = x^1;
-                    break;
-                }
-            }
-        }
-        return count;
-    }
-}
-</code></pre>
-<p>新人两两成对，所以外部遍历左边第一位的编号，如果当前两位符合要求，则继续遍历，不符合则遍历寻找从此开始符合的那一位，进行交换，<mark>此题如果使用和1异或的性质则会节省很多代码</mark></p>
-<blockquote>
-<p>x^1：一个数x和1异或，如果x为偶数，异或结果为x+1,如果x为奇数，结果为x-1</p>
-</blockquote>
-<p><strong>题目三描述:</strong> 小招正在玩一款修塔游戏：系统中有n座高塔，每座高塔由若干个高度相同的方块堆砌而成。修塔游戏的规则为：<br>
-（1）每次从最高塔的塔尖拿走一个方块<br>
-（2）每次在最低塔的塔尖堆砌一个方块<br>
-小招每次只能完成上述两个动作中的一个动作。游戏的目标是使n座高塔中至少有k座高塔的高度相同，请问小招最少需要多少次才能完成游戏。<br>
-<strong>测试输入：</strong> 输入共有2行，第一行为n和k(1≤k≤n≤200000 )，第二行为n座塔的高度组成的数组 a1, a2, ...an(1≤aj≤10000)。<br>
-6 5<br>
-1 2 2 4 2 3<br>
-<strong>测试输出：3</strong></p>
-<p><mark>主要解题思路放在代码注释中了</mark></p>
-<pre><code class="language-java">public class Main {
-    public static void main(String[] args) {
-        Scanner in = new Scanner(System.in);
-        int n = in.nextInt();
-        int k = in.nextInt();
-        int[] arr = new int[n];
-        for (int i = 0; i &lt; n; i++) {
-            arr[i] = in.nextInt();
-        }
-        System.out.println(helper(arr, n, k));
-    }
- 
-    public static int helper(int[] arr, int n, int k) {
-        int[] count = new int[10001];
-        int minT = Integer.MAX_VALUE;
-        int maxT = 0;
-        //将每个高度出现的次数存入数组，遍历后找出最高和最低
-        for (int a : arr) {
-            count[a]++;
-            minT = Math.min(a, minT);
-            maxT = Math.max(a, maxT);
-        }
- 
-        int ans = Integer.MAX_VALUE;
-        //从最小高度开始找
-        //整体思路为遍历每个高度，然后分别求其他塔变成当前高度所需次数，在所有结果中求最小值，过程分别为降低高度和增加高度，单独求解次数
-        for (int i = minT; i &lt;= maxT; i++) {
-        //如果此时高度数量满足要求，则不需要移动
-            if (count[i] &gt;= k)
-                return 0;
- 
- 			//从最低塔尖堆砌
-            int inc = 0;
-            int incCnt = 0;
-             /*
-            最低和最高的思路是正好相反的
-            这里的思路是这样的：
-			由于每次只能堆砌最低塔尖，则必须将除了此时i高度的塔都堆砌到同一高度，即等于i-1的那个高度，最后加上缺少的数量则为结果，每次加完更新最小值为结果
-            */
-            for (int j = minT; j &lt; i; j++) {
-                if (count[j] != 0) {
-                    incCnt += count[j];
-                    inc += (i - 1 - j) * count[j];
-                }
-            }
-            if (incCnt &gt;= k - count[i]) {
-                inc += k - count[i];
-                ans = Math.min(ans, inc);
-            }
- 
- 			//从最高塔尖拿走
-            int dec = 0;
-            int decCnt = 0;
-            /*
-            这里的思路是这样的：
-			由于每次只能拿最高塔尖，则将除了此时i高度的塔都拿到同一高度，即等于i+1的那个高度，最后加上缺少的数量则为结果，每次加完更新最小值为结果
-            */
-            for (int j = i + 1; j &lt;= maxT; j++) {
-                if (count[j] != 0) {
-                    decCnt += count[j];
-                    dec += (j - i - 1) * count[j];
-                }
-            }
-            if (decCnt &gt;= k - count[i]) {
-                dec += k - count[i];
-                ans = Math.min(ans, dec);
-            }
- 
-        }
-        return ans;
-    }
-}
-</code></pre>
-<p>第三道题本身并不是运用了很复杂的算法，但是发现自己的数学抽象能力有待提高，要将题目所给的条件转化为数字之间的逻辑关系，这才是这类题目的切入点，首先要理解题目。<br>
-<strong>如这道题需要理解到，要想求出正确的操作次数，要知道如果当前高度为i，其他塔高必须要满足i+1/i-1才可以继续操作移动塔高满足要求，问题到这里就迎刃而解了</strong></p>
+				<!-- API地址：https://bm.weajs.com/user-->
+<!--https://mufeng.me/post/have-seen-the-film-->
+<p><em><strong><center>Do not go gentle into that good night</center></strong></em> <em><strong><center>Old age should burn and rave at close of day</center></strong></em> <em><strong><center>Rage, rage against the dying of the light</center></strong></em></p>
+<head>
+  <meta name="referrer" content="never">
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/gh/iMuFeng/bmdb@1.8.0/dist/Bmdb.min.css">
+</head>
+<!-- Post Content -->
+<article>   
+<div class="post-content"></div>
+<link href="https://cdn.jsdelivr.net/gh/iMuFeng/bmdb@1.2.1/dist/Bmdb.min.css" type="text/css" rel="stylesheet"/>
+<script type="text/javascript" src="https://cdn.staticfile.org/jquery/3.3.1/jquery.min.js"></script>
+<script type="text/javascript" src="https://cdn.jsdelivr.net/gh/iMuFeng/bmdb@1.2.1/dist/Bmdb.min.js"></script>
+<script>new Bmdb({
+    type: 'movies',
+    selector: '.post-content',
+    secret: 'GDNTpG1jKLBU0tCxcYLfdqagks1UiErv41pTVY1bfvm2oEyeGB0JsRqs2U7sNgmt',
+    noMoreText: '没有更多数据了',
+    limit: 30,
+    cache: true,
+    showCategories: true
+})
+</script>
+</article>
 
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
-				<a href="https://pittttt.github.io/tag/mQHiMVVWv/" rel="tag">算法</a>	
-				 
-				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
-				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
-		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/hello-world/" rel="prev"> Hello World</a></div>
 		 
-		 
-		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/leetcode-bu-tong-lu-jing-de-liang-chong-bp-jie-fa/" rel="next"> leetcode不同路径的两种BP解法</a></div>
-		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>Mybatis逆向工程后报错IllegalArgumentException解决 | PITT&#39;S BLOG</title>	
+<title>播放器 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,8 +55,6 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
-		
-		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/3ghNmkeW5ZEzDGy.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -146,10 +144,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">Mybatis逆向工程后报错IllegalArgumentException解决</h1>
+			<h1 class="wow swing entry-title">播放器</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-02-12 22:02:03" itemprop="datePublished" pubdate="">2020-02-12</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-05-18 16:33:54" itemprop="datePublished" pubdate="">2020-05-18</time></i>
 	          </div>
 			
 </span>
@@ -157,74 +155,28 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<p><strong>问题：</strong><br>
-通过配置mybatis逆向工程的配置文件generatorConfig.xml自动生成实体类，接口和xml文件十分方便，但是在启动springboot时，报错<br>
-<em>IllegalArgumentException: Result Maps collection already contains value for xxx</em><br>
-原因其实是，在生成的xxxMapper.xml文件中的resultMap重复了<br>
-<mark>可能存在的情况有两种：</mark></p>
-<h3 id="1再次使用逆向工程生成接口和xml文件时没有删除原来的xml文件导致resultmap重复">1.再次使用逆向工程生成接口和xml文件时，没有删除原来的xml文件，导致resultMap重复</h3>
-<p>下面为复制了控制台报错的开头一部分</p>
-<pre><code>Error creating bean with name 'itemKillMapper' defined in file 
-[D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\server\WEB-INF\classes\com\pitt\kill\model\mapper\ItemKillMapper.class]: 
-Unsatisfied dependency expressed through bean property 'sqlSessionFactory'; 
-nested exception is org.springframework.beans.factory.BeanCreationException: 
-Error creating bean with name 'sqlSessionFactory' defined in class path resource [org/mybatis/spring/boot/autoconfigure/MybatisAutoConfiguration.class]: 
-Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: 
-Failed to instantiate [org.apache.ibatis.session.SqlSessionFactory]: 
-Factory method 'sqlSessionFactory' threw exception; 
-nested exception is java.lang.NoSuchMethodError: org.apache.ibatis.session.Configuration.setVfsImpl(Ljava/lang/Class;)V
-</code></pre>
-<p><mark>删除原来的xml文件重新生成即可解决</mark></p>
-<h3 id="2使用了version-8x-的-connectorj">2.使用了version 8.x 的 Connector/J</h3>
-<pre><code class="language-xml">&lt;dependency&gt;
-       &lt;groupId&gt;mysql&lt;/groupId&gt;
-       &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-       &lt;version&gt;8.0.11&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-<p>由于我使用了8.0.11版本的mysql-connector-java，逆向工程生成实体类时会自动生成UserWithBLOBs.java 和 UserKey.java文件，而<mark>这两个文件会导致UserMapper.xml中的resultMap重复。</mark> 从而产生报错。</p>
-<p>在<a href="http://mybatis.org/generator/usage/mysql.html#">MyBatis Generator</a> 的官方文档中对这个问题进行了描述</p>
-<blockquote>
-<p>If you are using version 8.x of Connector/J you may notice that the generator attempts to generate code for tables in the MySql information schemas (sys, information_schema, performance_schema, etc.) This is probably not what you want! To disable this behavior, add the property “nullCatalogMeansCurrent=true” to your JDBC URL.</p>
-</blockquote>
-<p>翻译为：</p>
-<blockquote>
-<p>如果您使用的是Connector / J的8.x版，您可能会注意到生成器尝试为MySql信息模式（sys，information_schema，performance_schema等）中的表生成代码。这可能不是您想要的！ 要禁用此行为，请将属性“nullCatalogMeansCurrent = true”添加到JDBC URL。</p>
-</blockquote>
-<p><strong>解决:</strong><br>
-1.更换低版本Connector<br>
-2.<mark>将属性“nullCatalogMeansCurrent = true”添加到JDBC URL（推荐）</mark></p>
-<pre><code> &lt;jdbcConnection 
-     driverClass=&quot;com.mysql.cj.jdbc.Driver&quot;
-     connectionURL=&quot;jdbc:mysql://localhost:3306/db_second_kill?serverTimezone=UTC&amp;amp;useUnicode=true&amp;amp;characterEncoding=utf-8&amp;amp;useSSL=false&amp;amp;nullCatalogMeansCurrent = true&quot; 
-     userId=&quot;root&quot;
-     password=&quot;123456&quot;&gt;
- &lt;/jdbcConnection&gt;
-</code></pre>
-<p><mark><strong>此外，注意！</strong></mark><br>
-如果在properties配置文件中配置了mybatis.mapper-locations，则在mybatis的xml配置文件中不用再写&lt; mapper resource &gt;配置</p>
-<pre><code class="language-java">mybatis.config-location=classpath:mybatis-config.xml
-mybatis.checkConfigLocation = true
-mybatis.mapper-locations=classpath:mappers/*.xml
-</code></pre>
-
+				<p>添加至html页脚代码中</p>
+<!-- require APlayer -->
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+<!-- require MetingJS -->
+<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+<meting-js
+        id="480463002"
+        server="netease"
+        type="playlist"
+        fixed="true"
+        list-olded="true">
+</meting-js>
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
-				<a href="https://pittttt.github.io/tag/e8F9VryvP/" rel="tag">MyBatis</a>	
-				 
-				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
-				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
-		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/nested-exception-is-orgapacheibatisbindingbindingexception-parameter-useridji-jsp-zhong-onclick-bao-cuo-jie-jue-fang-an/" rel="prev"> ibatis.binding.BindingException: Parameter &#39;userId&#39;及JSP中onclick报错解决方案</a></div>
 		 
-		 
-		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/springboot-xiang-mu-shi-yong-wai-bu-tomcat-fang-wen-wang-ye-chu-xian-404-wen-ti/" rel="next"> SpringBoot项目使用外部Tomcat访问网页出现404问题</a></div>
-		
 		</div>
 	</nav>
 	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">

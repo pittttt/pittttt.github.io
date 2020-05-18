@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://pittttt.github.io</id>
     <title>PITT&apos;S BLOG</title>
-    <updated>2020-05-16T11:16:13.667Z</updated>
+    <updated>2020-05-18T01:43:31.413Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://pittttt.github.io"/>
     <link rel="self" href="https://pittttt.github.io/atom.xml"/>
@@ -10,6 +10,18 @@
     <logo>https://pittttt.github.io/images/avatar.png</logo>
     <icon>https://pittttt.github.io/favicon.ico</icon>
     <rights>All rights reserved 2020, PITT&apos;S BLOG</rights>
+    <entry>
+        <title type="html"><![CDATA[Github Pages不被百度收录的问题]]></title>
+        <id>https://pittttt.github.io/post/github-pages-bu-bei-bai-du-shou-lu-de-wen-ti/</id>
+        <link href="https://pittttt.github.io/post/github-pages-bu-bei-bai-du-shou-lu-de-wen-ti/">
+        </link>
+        <updated>2020-05-17T13:42:15.000Z</updated>
+        <content type="html"><![CDATA[<p>利用Github Pages搭建个人博客非常的方便，但是由于某些原因，Github Pages搭建的网站并不会被百度爬虫收录<br>
+<img src="https://pittttt.github.io/post-images/1589766148383.PNG" alt="" loading="lazy"><br>
+大多数解决方法为采用双仓库，将github上的仓库同步到coding pages上，之后利用<a href="https://www.dnspod.cn">dnspod</a>进行域名解析，将百度线路单独解析到coding pages，其他线路默认访问github<br>
+https://blog.csdn.net/weixin_33724570/article/details/88588654</p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[对Map的key和value分别进行排序]]></title>
         <id>https://pittttt.github.io/post/dui-map-de-key-he-value-fen-bie-jin-xing-pai-xu/</id>
@@ -704,21 +716,6 @@ public class MainApplication extends SpringBootServletInitializer {
 <pre><code class="language-xml">&lt;Context docBase=&quot;D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\server&quot; 
 path=&quot;&quot; reloadable=&quot;true&quot; 
 source=&quot;org.eclipse.jst.jee.server:server&quot;/&gt;
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[SpringBoot的pom.xml报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20]]></title>
-        <id>https://pittttt.github.io/post/myeclipse-dao-ru-spring-boot-de-shi-hou-ti-shi-bao-cuo-failure-to-transfer-orgcodehausplexusplexus-utilsjar3020/</id>
-        <link href="https://pittttt.github.io/post/myeclipse-dao-ru-spring-boot-de-shi-hou-ti-shi-bao-cuo-failure-to-transfer-orgcodehausplexusplexus-utilsjar3020/">
-        </link>
-        <updated>2020-01-28T16:41:06.000Z</updated>
-        <content type="html"><![CDATA[<p>在网上找了很多方法都没有解决，其实导致这个报错的原因是因为网络差没有从maven官方仓库下载成功jar，尝试在在pom.xml文件中加上以下代码，成功解决。</p>
-<pre><code>&lt;dependency&gt;
-		&lt;groupId&gt;org.codehaus.plexus&lt;/groupId&gt;
-		&lt;artifactId&gt;plexus-utils&lt;/artifactId&gt;
-   	        &lt;version&gt;3.0.20&lt;/version&gt;
-&lt;/dependency&gt;
 </code></pre>
 ]]></content>
     </entry>

@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>Github Pages不被百度收录的问题 | PITT&#39;S BLOG</title>	
+<title>解决Github Pages不被百度收录的问题 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -55,6 +55,8 @@ window.onload=getCSS();
         
 			
 		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/18/OyNzsQPYlHA8e2E.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -144,7 +146,7 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">Github Pages不被百度收录的问题</h1>
+			<h1 class="wow swing entry-title">解决Github Pages不被百度收录的问题</h1>
 <div class="entry-meta">
 <div class="wow bounce">
 	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-05-17 21:42:15" itemprop="datePublished" pubdate="">2020-05-17</time></i>
@@ -155,14 +157,38 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<p>利用Github Pages搭建个人博客非常的方便，但是由于某些原因，Github Pages搭建的网站并不会被百度爬虫收录<br>
+				<h2 id="前言">前言</h2>
+<p>利用Github Pages搭建个人博客非常的方便，但是由于某些原因，Github Pages搭建的网站并不会被百度爬虫收录<br>
 <img src="https://pittttt.github.io/post-images/1589766148383.PNG" alt="" loading="lazy"><br>
-大多数解决方法为采用双仓库，将github上的仓库同步到coding pages上，之后利用<a href="https://www.dnspod.cn">dnspod</a>进行域名解析，将百度线路单独解析到coding pages，其他线路默认访问github<br>
-https://blog.csdn.net/weixin_33724570/article/details/88588654</p>
+大多数解决方法为采用双仓库，将github上的仓库同步到coding pages上，之后利用<a href="https://www.dnspod.cn">dnspod</a>进行域名解析，将百度线路单独解析到coding pages，其他线路默认访问github，这里提供一种利用netlify托管平台来使百度爬虫收录的方法</p>
+<h2 id="将github-pages项目托管至netlify网站">将Github Pages项目托管至netlify网站</h2>
+<p>首先点击<strong>New site from Git</strong><br>
+<img src="https://pittttt.github.io/post-images/1589767867405.PNG" alt="" loading="lazy"><br>
+这里提供3个导入方式，选择GitHub<br>
+<img src="https://pittttt.github.io/post-images/1589767943922.PNG" alt="" loading="lazy"><br>
+选择你的Github Pages仓库<br>
+<img src="https://pittttt.github.io/post-images/1589768022919.PNG" alt="" loading="lazy"><br>
+这一步可以设置部署仓库的分支，编译命令和部署目录，如果是是编译后的静态文件，直接点击<strong>Deply site</strong>即可<br>
+<img src="https://pittttt.github.io/post-images/1589769263504.PNG" alt="" loading="lazy"><br>
+之后netlify会进行自动部署，等待几分钟后会生成一个随机网址，此时你就可以通过这个网站访问你的Github Pages上部署的博客了，你可以点击<strong>Domain settings</strong>进行域名设置，如修改为https://pitt.netlify.app<br>
+<img src="https://pittttt.github.io/post-images/1589769768645.PNG" alt="" loading="lazy"><br>
+也可以绑定你自己的域名，先在你的域名管理系统里新建解析，将域名CNAME指向到你的netlify二级域名，点击<strong>Add custom domain</strong>输入你的自定义域名即可<br>
+<img src="https://pittttt.github.io/post-images/1589769638848.PNG" alt="" loading="lazy"><br>
+最后可以为你的自定义域名开启HTTPS认证，域名验证通过会自动申请证书<br>
+至此，部署过程就结束了，之后每次你更新Github Pages，都会自动同步到netlify<br>
+<img src="https://pittttt.github.io/post-images/1589770050721.PNG" alt="" loading="lazy"></p>
+<h2 id="验证是否会被百度爬虫收录">验证是否会被百度爬虫收录</h2>
+<p><img src="https://pittttt.github.io/post-images/1589770553279.PNG" alt="" loading="lazy"><br>
+可以看到百度爬虫是可以抓取到的，之后我又进行了网站测速，结果如下：<br>
+<img src="https://pittttt.github.io/post-images/1589770609803.PNG" alt="" loading="lazy"><br>
+由于是在网络使用高峰期进行测试的，网站的相应都比较慢，但是看到Github Pages的响应还是要比netlify快一倍，netlify是自动进行CDN加速的，可能是我没有配置独立域名的原因😅<br>
+<strong>总结以上，如果觉得Github Pages访问过慢，可以将网站同时托管在Coding Pages上，将国内流量解析至Coding上，netlify可以暂时解决不被百度收录的问题</strong></p>
 
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
+				<a href="https://pittttt.github.io/tag/eOn2Woc-h/" rel="tag">tools</a>	
+				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		

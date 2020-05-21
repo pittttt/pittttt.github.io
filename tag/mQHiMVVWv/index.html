@@ -273,7 +273,26 @@ jQuery(document).ready(function($) {
         fixed="true"
         list-olded="true">
 </meting-js>
-COPYRIGHT © 2020 <a href="https://pittttt.github.io" target="_blank">PITT</a><br>
+<span id="runtime_span"></span>
+<script type="text/javascript">
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("06/20/2019 20:30:44");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = A + "d" + B + "h" + C + "min" + D + "s"
+    }
+    show_runtime();
+</script><br>
+COPYRIGHT © 2020 <a href="https://pittttt.github.io" target="_blank">PITT</a> 
 Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a><br>Theme:   <a href="https://github.com/shanbufun/gridea-theme-pan" target="_blank" title="Pan"><span>Pan</span></a>.  by <a href="https://shanbu.fun/" target="_blank"  title="山卜方" >Shanbufun</a></div>		
 			</div>
 		

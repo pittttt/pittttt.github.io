@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://pittttt.github.io</id>
     <title>PITT&apos;S BLOG</title>
-    <updated>2020-05-23T11:56:11.182Z</updated>
+    <updated>2020-05-25T05:53:00.466Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://pittttt.github.io"/>
     <link rel="self" href="https://pittttt.github.io/atom.xml"/>
@@ -512,7 +512,7 @@ Loaded  Bytes  Unloaded  Bytes     Time
  21627 40737.3        0     0.0      17.63
 </code></pre>
 <hr>
-<p>此命令可以用来产看jvn编译的数量信息</p>
+<p>此命令可以用来产看jvm编译的数量信息</p>
 <pre><code>C:\Program Files\Java\jdk1.8.0_211\bin&gt;jstat -compiler 2128
 Compiled Failed Invalid   Time   FailedType FailedMethod
    10344      3       0    45.47          1 org/springframework/beans/GenericTypeAwarePropertyDescriptor &lt;init&gt;

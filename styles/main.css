@@ -2059,7 +2059,7 @@ ul.links li:hover .bg {
   color: #f70606;
   margin: 50px 0 50px 0;
 }
-.site-footer {
+.site-footer .container {
   overflow: hidden;
   text-align: center;
 }

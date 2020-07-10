@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://pittttt.github.io</id>
     <title>PITT&apos;S BLOG</title>
-    <updated>2020-07-10T14:49:32.029Z</updated>
+    <updated>2020-07-10T14:50:43.819Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://pittttt.github.io"/>
     <link rel="self" href="https://pittttt.github.io/atom.xml"/>
@@ -15,7 +15,7 @@
         <id>https://pittttt.github.io/post/mysql-zhong-union-cha-xun-de-chang-jian-wen-ti/</id>
         <link href="https://pittttt.github.io/post/mysql-zhong-union-cha-xun-de-chang-jian-wen-ti/">
         </link>
-        <updated>2020-07-10T14:42:57.000Z</updated>
+        <updated>2020-07-06T08:35:53.000Z</updated>
         <content type="html"><![CDATA[<p><strong>实习过程中用到了UNION查询，遇到不少问题，记录一下</strong><br>
 这条sql语句的大体逻辑是这样的：需要从多张表中查询两种不同类型的数据，用UNION合并后，用动态sql语句来筛选，最后将所有数据排序</p>
 <h4 id="union查询中的字段顺序">UNION查询中的字段顺序</h4>

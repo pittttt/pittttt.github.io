@@ -192,7 +192,7 @@ SELECT * FROM (
 </code></pre>
 <p>上面的sql语句中有几点需要注意的：</p>
 <ol>
-<li><mark>被<![CDATA[]]>这个标记所包含的内容将表示为纯文本</mark>，比如<![CDATA[>]]>表示文本内容“&gt;”，因为sql语句是在xml文件中写的，在xml中，”&lt;”、”&gt;”、”&amp;”等字符是不能直接存入的</li>
+<li><mark>被<![CDATA[]]>这个标记所包含的内容将表示为纯文本</mark>，比如<![CDATA[>]]>表示文本内容“&gt;”，因为sql语句是在xml文件中写的，在xml中，&quot;&lt;&quot;、&quot;&gt;&quot;、&quot;&amp;&quot;等字符是不能直接存入的</li>
 <li><mark>第二条select语句中查询字段有两个null</mark>，因为union要求两个select语句的结果中的列必须是<mark>完全同名且同顺序的</mark>，但是如果列数量不同怎么办，可以用null来替代，不然sql会报错<code>The used SELECT statements have a different number of columns</code></li>
 <li>在使用union查询后排序，需要指定临时表名，即上面代码中的<code>SELECT * FROM (***) AS A</code>，不然报错<code>Every derived table must have its own alias</code></li>
 </ol>

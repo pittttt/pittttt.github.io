@@ -6,7 +6,7 @@
 <meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
 <meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
 <meta HTTP-EQUIV="expires" CONTENT="0"> 
-<title>SpringBoot的pom.xml报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20 | PITT&#39;S BLOG</title>	
+<title>mysql中UNION查询的常见问题 | PITT&#39;S BLOG</title>	
 
 <link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
 <script type="text/javascript">
@@ -56,7 +56,7 @@ window.onload=getCSS();
 			
 		<header id="header" class="site-header" 
 		
-		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://i.loli.net/2020/05/14/eZzFMVACjGQdwNc.jpg)"
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://pittttt.github.io/post-images/mysql-zhong-union-cha-xun-de-chang-jian-wen-ti.jpg)"
 		
 		>
 			<div class="site-branding">
@@ -146,10 +146,10 @@ window.onload=getCSS();
 	
 	                      
 		<div class="entry-content">
-			<h1 class="wow swing entry-title">SpringBoot的pom.xml报错:Failure to transfer org.codehaus.plexus:plexus-utils:jar:3.0.20</h1>
+			<h1 class="wow swing entry-title">mysql中UNION查询的常见问题</h1>
 <div class="entry-meta">
 <div class="wow bounce">
-	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-01-29 00:41:06" itemprop="datePublished" pubdate="">2020-01-29</time></i>
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2020-07-10 22:42:57" itemprop="datePublished" pubdate="">2020-07-10</time></i>
 	          </div>
 			
 </span>
@@ -157,30 +157,59 @@ window.onload=getCSS();
 		</div>
                   
 			<div class="wow slideInLeft entry-summary song">
-				<p>在网上找了很多方法都没有解决，其实导致这个报错的原因是因为网络差没有从maven官方仓库下载成功jar，尝试在在pom.xml文件中加上以下代码，成功解决。</p>
-<pre><code>&lt;dependency&gt;
-		&lt;groupId&gt;org.codehaus.plexus&lt;/groupId&gt;
-		&lt;artifactId&gt;plexus-utils&lt;/artifactId&gt;
-   	        &lt;version&gt;3.0.20&lt;/version&gt;
-&lt;/dependency&gt;
+				<p><strong>实习过程中用到了UNION查询，遇到不少问题，记录一下</strong><br>
+这条sql语句的大体逻辑是这样的：需要从多张表中查询两种不同类型的数据，用UNION合并后，用动态sql语句来筛选，最后将所有数据排序</p>
+<h4 id="union查询中的字段顺序">UNION查询中的字段顺序</h4>
+<p>首先，两条select语句合并后再用where来筛选数据的方式有两种，为了方便已经将字段简化，下面为一种，也可以在两条select语句中先where筛选，之后使用UNION合并</p>
+<pre><code class="language-sql">&lt;select id=&quot;queryList&quot; resultType=&quot;**VO&quot; parameterType=&quot;**VO&quot;&gt;
+SELECT * FROM (
+    SELECT
+    t.tenant_code,o.object_subject,t.kr_code,t.object_code,
+    IF(date_format(NOW(),'%Y-%m-%d') &lt;![CDATA[&gt;]]&gt; t.end_date, TRUE, FALSE) AS overdue
+    FROM
+    task t,
+    objective o
+    WHERE
+    t.yn=1
+    AND t.object_code = o.object_code
+
+    UNION ALL
+    SELECT
+    t.tenant_code,o.object_subject,null,null,
+    IF(date_format(NOW(),'%Y-%m-%d') &lt;![CDATA[&gt;]]&gt; t.end_date, TRUE, FALSE) AS overdue
+    FROM
+    task t
+    WHERE
+    t.type='normal'
+    ) AS A
+    WHERE
+    A.overdue = 0
+    &lt;if test=&quot;taskType != null&quot;&gt;
+      AND A.task_type = #{taskType}
+    &lt;/if&gt;
+    ORDER BY sort ASC,id ASC
+&lt;/select&gt;
 </code></pre>
+<p>上面的sql语句中有几点需要注意的：</p>
+<ol>
+<li><mark>被<![CDATA[]]>这个标记所包含的内容将表示为纯文本</mark>，比如<![CDATA[>]]>表示文本内容“&gt;”，因为sql语句是在xml文件中写的，在xml中，”&lt;”、”&gt;”、”&amp;”等字符是不能直接存入的</li>
+<li><mark>第二条select语句中查询字段有两个null</mark>，因为union要求两个select语句的结果中的列必须是<mark>完全同名且同顺序的</mark>，但是如果列数量不同怎么办，可以用null来替代，不然sql会报错<code>The used SELECT statements have a different number of columns</code></li>
+<li>在使用union查询后排序，需要指定临时表名，即上面代码中的<code>SELECT * FROM (***) AS A</code>，不然报错<code>Every derived table must have its own alias</code></li>
+</ol>
+<h4 id="union和union-all的区别">UNION和UNION ALL的区别</h4>
+<p>UNION 操作会对结果去重且排序，而UNION ALL会直接返回合并结果，不做处理，所以UNION ALL的速度会更快，根据需求进行选择</p>
+<p><strong>P.S.</strong>  实体类entity要根据使用场景不同来命名，Bo(business object)代表业务对象，Vo(value object)为值对象，通常同于和视图层进行交互，即后台和前端之间的传递对象，Po(persistant object)代表持久层对象的意思，对应数据库中表的字段</p>
 
 							</div>
 	<div class="wow bounceInDown vt-post-tags">
  
-				<a href="https://pittttt.github.io/tag/lmitB0Gcz/" rel="tag">SpringBoot</a>	
-				 
-				<a href="https://pittttt.github.io/tag/nIrbzSzkh/" rel="tag">Java</a>	
-				 
 					</div>						
 <nav class="navigation3 post-navigation3" role="navigation">
 		
 		<div class="nav-links3">
       
-		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/springboot-xiang-mu-shi-yong-wai-bu-tomcat-fang-wen-wang-ye-chu-xian-404-wen-ti/" rel="prev"> SpringBoot项目使用外部Tomcat访问网页出现404问题</a></div>
 		 
-		 
-		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/shi-yong-static-guan-jian-zi-guo-cheng-zhong-suo-yu-dao-de-wen-ti/" rel="next"> 使用static关键字过程中所遇到的问题</a></div>
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/github-pages-bu-bei-bai-du-shou-lu-de-wen-ti/" rel="next"> 解决Github Pages不被百度收录的问题</a></div>
 		
 		</div>
 	</nav>

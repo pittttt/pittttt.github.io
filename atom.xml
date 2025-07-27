@@ -2,7 +2,7 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://pittttt.github.io</id>
     <title>PITT&apos;S BLOG</title>
-    <updated>2025-07-27T11:09:56.516Z</updated>
+    <updated>2025-07-27T12:21:08.971Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://pittttt.github.io"/>
     <link rel="self" href="https://pittttt.github.io/atom.xml"/>
@@ -67,6 +67,72 @@ ceil(1+N*log10(2)) N为二进制位数<br>
 <p><a href="https://0.30000000000000004.com/">https://0.30000000000000004.com/</a><br>
 <a href="https://babbage.cs.qc.cuny.edu/IEEE-754/">https://babbage.cs.qc.cuny.edu/IEEE-754/</a><br>
 <a href="https://web.archive.org/web/20120208075518/http:/www.cs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF">IEEE Standard 754 for Binary Floating-Point Arithmetic</a></p>
+]]></content>
+    </entry>
+    <entry>
+        <title type="html"><![CDATA[从请求阻塞异常到 Lambda 实现原理]]></title>
+        <id>https://pittttt.github.io/post/cong-qing-qiu-zu-sai-yi-chang-dao-lambda-shi-xian-yuan-li/</id>
+        <link href="https://pittttt.github.io/post/cong-qing-qiu-zu-sai-yi-chang-dao-lambda-shi-xian-yuan-li/">
+        </link>
+        <updated>2024-03-27T11:24:09.000Z</updated>
+        <content type="html"><![CDATA[<h2 id="情景再现">情景再现</h2>
+<p>在 CNY 开发的时候，提供出去的 SDK 工具类中有一个 ReloadableCache，我想放在 static 代码块中 对它进行初始化。下面这段代码所产生的现象就是，一旦请求打到接口，程序就会阻塞，产生死锁</p>
+<p>代码简化如下:</p>
+<pre><code class="language-java">@RequestMapping(value = &quot;/test&quot;, method = {GET, POST}) 
+public String test() {
+        //程序在这里阻塞，永远不会返回 
+        return Utils.getCache();
+}
+public class Utils  {
+        private static final ReloadableCache&lt;String&gt; RELOADABLE_CACHE =                      LocalCacheFactory.&lt;String&gt; newBuilder()
+                .enableAutoReload(() -&gt; Duration.ofSeconds(Kconf.get())) 
+                .factory(Utils::init)
+                .name(&quot;reloadableCache&quot;) 
+                .firstAccessFailObject(&quot;empty&quot;)
+                .build();
+        static { //想初始化缓存
+                RELOADABLE_CACHE.get();
+                }
+        public static String getCache() {
+                return RELOADABLE_CACHE.get();
+            }
+}
+</code></pre>
+<h2 id="问题根源">问题根源</h2>
+<pre><code class="language-shell">http-nio-8080-exec-1&quot;#73 daemon prio=5 os_prio=31=296.82stid=0x00007fcb0077e000 nid=0xc903 waiting on ditionon
+[0x000070000e6ea000]
+    java.lang.Thread.State:WAITING (parking)
+        at jdk.internal.misc.Unsafe.park(java.base@11.0.18/Native Method) 
+        - parking to wait for&lt;0x0000000706500500&gt;(a com.google.common.util.concurrent.SettableFuture)
+        at java.util.concurrent.Locks.LockSupport.park((java.base@11.0.18/LockSupport.java:194)
+        at com.google.common.util.concurrent.AbstractFuture.get(AbstractFuture.java:539)
+        at com.github.phantomthief.localcache.impl.ZkNotifyReloadCache.init(ZkNotifyReloadcache.iava:156)
+        at com.github.phantomthief.localcache.impl.ZkNotifyReloadCache.get(ZkNotifyReloadcache.iava:107)
+        - locked &lt;0x0000000706500500&gt; （a  com.github.phantomthief.localcache.impl.ZkNotifyReloadCache）
+        at com.kuaishou.xxxx.Utils.&lt;client&gt;(Utils.java.29)
+</code></pre>
+<p>乍一看并不知道什么导致了死锁阻塞，首先我们看下 jstack，发现请求过来的线程等待资源被挂起 了，下述代码是 ReloadableCache 中 init 操作的主要流程，大概意思是新起了一个线程用来进行 zk subscribe 等操作<br>
+<img src="https://pittttt.github.io/post-images/1753618408312.png" alt="" loading="lazy"><br>
+是不是新线程的 postCacheInit 方法没有完成呢，看下新线程的的执行情况，线程虽然是 RUNNING 状态，但是卡在了一个奇怪的地方，Utils 类的一个 lambda 表达式(com.kuaishou.keyconfig.util.Utils$$Lambda$1022)<br>
+<img src="https://pittttt.github.io/post-images/1753618427987.png" alt="" loading="lazy"><br>
+跟着线程堆栈找一下，发现卡在执行 scheduleRunDuration 这个 Supplier 变量的 get，而这个变量， 是在 Builder 中通过 enableAutoReload 方法进行初始化的，所以这个 lambda 表达式就是 Utils 类 中的初始化方法() -&gt; Duration.ofSeconds(Kconf.get())<br>
+<img src="https://pittttt.github.io/post-images/1753618455475.png" alt="" loading="lazy"><br>
+<img src="https://pittttt.github.io/post-images/1753618460425.png" alt="" loading="lazy"><br>
+接下来我们用 javap 反编译下 Utils 类的代码看看 Lambda 做了什么<br>
+<img src="https://pittttt.github.io/post-images/1753618487380.png" alt="" loading="lazy"><br>
+首先可以看到 lambda 表达式会生成一个私有的静态函数，接下来我们看静态代码块中具体干了什么<br>
+<img src="https://pittttt.github.io/post-images/1753618600214.png" alt="" loading="lazy"><br>
+使用 javap -v 对文件进行反编译，可以看到在 static 代码块中执行了一条 invokedynamic 指令， 这条指令对应了代码中的 lambda 表达式，通过常量池中的标识操作数对应到 BootstrapMethods 属性表，所以这条指令最终走到了 java/lang/invoke/LambdaMetafactory.metafactory 这个方法，这个方法返回一个调用点对象 CallSite，它包含了一个方法句柄，会指向最终绑定到这个调用点上的方法<br>
+<img src="https://pittttt.github.io/post-images/1753618828179.png" alt="" loading="lazy"><br>
+metafactory 这个方法包含方法类型以及指向 lambda 表达式所代表的静态私有方法的方法句柄，最终通过 InnerClassLambdaMetafactory 创建内部匿名类，并通过 asm 动态生成字 节码，最后通过 unsafe 类的 defineAnonymousClass 方法将字节码转换为 class 文件，至 此，完成了一行 lambda 表达式，从字节码到静态匿名方法的转换<br>
+<img src="https://pittttt.github.io/post-images/1753618663476.png" alt="" loading="lazy"><br>
+<img src="https://pittttt.github.io/post-images/1753618212777.png" alt="" loading="lazy"><br>
+<img src="https://pittttt.github.io/post-images/1753618252964.png" alt="" loading="lazy"><br>
+整个调用流程大致如下:<br>
+<img src="https://pittttt.github.io/post-images/1753618223244.png" alt="" loading="lazy"><br>
+问题到这里，基本已经清晰了，类的初始化过程在整个生命周期中只会执行一次，第一个触发类初 始化的线程会获取该类的同步锁，在这个过程中，lambda 表达式又一次触发了同一个类的初始化， 造成了死锁</p>
+<h2 id="参考">参考:</h2>
+<p><a href="http://ifeve.com/jvm%e4%b9%8b%e5%8a%a8%e6%80%81%e6%96%b9%e6%b3%95%e8%b0%83%e7%94%a8%ef%bc%9ainvokedynamic/">JVM 之动态方法调用:invokedynamic</a></p>
 ]]></content>
     </entry>
     <entry>
@@ -724,35 +790,6 @@ bin目录下提供了多种工具来监控jvm的运行运行状态，能通过�
 <blockquote>
 <p>参考：http://boendev.iteye.com/blog/882479</p>
 </blockquote>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[ibatis.binding.BindingException: Parameter 'userId'及JSP中onclick报错解决方案]]></title>
-        <id>https://pittttt.github.io/post/nested-exception-is-orgapacheibatisbindingbindingexception-parameter-useridji-jsp-zhong-onclick-bao-cuo-jie-jue-fang-an/</id>
-        <link href="https://pittttt.github.io/post/nested-exception-is-orgapacheibatisbindingbindingexception-parameter-useridji-jsp-zhong-onclick-bao-cuo-jie-jue-fang-an/">
-        </link>
-        <updated>2020-02-15T03:27:18.000Z</updated>
-        <content type="html"><![CDATA[<h2 id="一-ibatisbindingbindingexception">一、ibatis.binding.BindingException</h2>
-<p>后台接受由前端传过来的参数并通过mybatis写入数据库时，报错：<br>
-<strong>nested exception is org.apache.ibatis.binding.BindingException: Parameter 'userId'</strong></p>
-<p>原因为Mapper接口中的参数定义没有加 <mark>@Param</mark> 参数导致无法识别和进行绑定从而报错</p>
-<pre><code class="language-java">int countByKillUserId(@Param(&quot;killId&quot;) Integer killId, @Param(&quot;userId&quot;) Integer userId);
-</code></pre>
-<h2 id="二-uncaught-referenceerror-xxx-is-not-defined-at-htmlbuttonelementonclick">二、Uncaught ReferenceError: XXX is not defined at HTMLButtonElement.onclick</h2>
-<p>onclick点击事件报错原因可能有两个<br>
-<strong>1.</strong><code>&lt;script src=&quot;${ctx}/static/plugins/jquery.js&quot;&gt;&lt;/script&gt;</code><br>
-<mark>script标签没有闭合，缺少&lt; /script&gt;</mark><br>
-<strong>2.<strong>点击事件内部方法报错，导致报错Uncaught ReferenceError<br>
-在写<code>&lt; a class=&quot;btn btn-info&quot; style=&quot;font-size: 20px&quot; onclick=&quot;executeKill()&quot;&gt;抢购&lt;/a&gt;</code>中的executeKill()方法时，调用了getJsonData()方法，结果发现<mark>data参数中少写了一个逗号</mark>，导致外部点击事件报错</strong>Uncaught ReferenceError: executeKill() is not defined at HTMLButtonElement.onclick</strong></p>
-<pre><code class="language-javascript">function getJsonData() {
-        var killId=$(&quot;#killId&quot;).val();
-        var data = {
-            &quot;killId&quot;:killId,
-            &quot;userId&quot;:5
-        };
-        return data;
-    }
-</code></pre>
 ]]></content>
     </entry>
 </feed>

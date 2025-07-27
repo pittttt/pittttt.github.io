@@ -1,0 +1,499 @@
+
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+ <meta name="viewport" content="width=device-width, initial-scale=1" />
+<meta HTTP-EQUIV="pragma" CONTENT="no-cache"> 
+<meta HTTP-EQUIV="Cache-Control" CONTENT="no-cache, must-revalidate"> 
+<meta HTTP-EQUIV="expires" CONTENT="0"> 
+<title>从请求阻塞异常到 Lambda 实现原理 | PITT&#39;S BLOG</title>	
+
+<link rel="stylesheet" href="https://pittttt.github.io/styles/main.css">
+<script type="text/javascript">
+function getCSS()
+{
+        datetoday = new Date();
+        timenow=datetoday.getTime();
+        datetoday.setTime(timenow);
+        thehour = datetoday.getHours();
+
+            display = "https://pittttt.github.io/media/css/night.css";
+
+            display = "https://pittttt.github.io/media/css/night.css";   
+      
+            display = "https://pittttt.github.io/media/css/day.css";
+
+            display = "https://pittttt.github.io/media/css/day.css";
+      
+
+var css = '<';
+        css+='link rel="stylesheet" href='+display+' \/';
+        css+='>';
+        document.write(css);
+}
+</script>
+<link href="https://fonts.googleapis.com/css?family=Dancing+Script|Liu+Jian+Mao+Cao&display=swap" rel="stylesheet">
+<link href="https://at.alicdn.com/t/font_1306644_jwtuc2zzbrd.css" rel="stylesheet" />
+<script src="https://cdn.bootcss.com/jquery/3.4.1/jquery.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/KaTeX/0.10.0/katex.min.css">
+<script type='text/javascript' src='https://pittttt.github.io/media/scripts/script.js'></script>
+<link href="https://cdn.bootcss.com/animate.css/3.5.2/animate.min.css" rel="stylesheet" />
+  <script src="https://cdn.bootcss.com/wow/1.1.2/wow.min.js"></script>
+  <script src="https://cdn.bootcss.com/highlight.js/9.15.8/highlight.min.js"></script>
+  <script>hljs.initHighlightingOnLoad();</script>
+  <script>wow=new WOW({boxClass:'wow',animateClass:'animated',offset:0,mobile:true,live:true});wow.init();</script>
+
+<script type="text/javascript">
+window.onload=getCSS();
+</script>
+
+
+ 	
+</head>
+<body class="post-template-default single single-post postid-70 single-format-standard">
+    <div id="wrapper">
+        
+			
+		<header id="header" class="site-header" 
+		
+		style="background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2)),url(https://pittttt.github.io/post-images/cong-qing-qiu-zu-sai-yi-chang-dao-lambda-shi-xian-yuan-li.png)"
+		
+		>
+			<div class="site-branding">
+									<h1 class="site-title"><a href="https://pittttt.github.io" rel="home">PITT&#39;S BLOG</a></h1>
+										
+					<h2 class="site-description">所见即所得</h2>
+										
+							</div>
+			<nav id="nav-wrapper">
+				<div class="container">
+					<div class="nav-toggle">
+						<div class="bars">
+							<div class="bar"></div>
+							<div class="bar"></div>
+							<div class="bar"></div>
+						</div>
+					</div>
+					<div class="clear"></div>
+					<ul id="" class="dove">
+		 
+     			
+<li>
+	 
+	<a  href="/"> 首页</a></li>
+	
+    
+     			
+<li>
+	 
+	<a  href="/archives"> 归档</a></li>
+	
+    
+     			
+<li>
+	 
+	<a  href="/post/links"> 友链</a></li>
+	
+    
+     			
+<li>
+	 
+	<a  href="/post/movie"> 电影</a></li>
+	
+    
+
+</ul>
+</li>		
+		
+</ul>				</div>
+			</nav>
+						<div class="jingge">
+
+
+    
+
+    
+			
+<a  href="https://github.com/pittttt" target="_blank" ><i class="iconfont icon-github"></i></a>
+ 
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+
+    
+        </header>
+
+		<div id="content" class="container">
+			<div class="row">
+	<div class="col-md-8 site-main">
+				
+<article id="post-70" class="post-70 post type-post status-publish format-standard hentry category-5 tag-10 tag-9 tag-11">
+
+	
+	                      
+		<div class="entry-content">
+			<h1 class="wow swing entry-title">从请求阻塞异常到 Lambda 实现原理</h1>
+<div class="entry-meta">
+<div class="wow bounce">
+	<i class="iconfont icon-rili"> <time class="lately-a" datetime="2024-03-27 19:24:09" itemprop="datePublished" pubdate="">2024-03-27</time></i>
+	          </div>
+			
+</span>
+													 
+		</div>
+                  
+			<div class="wow slideInLeft entry-summary song">
+				<h2 id="情景再现">情景再现</h2>
+<p>在 CNY 开发的时候，提供出去的 SDK 工具类中有一个 ReloadableCache，我想放在 static 代码块中 对它进行初始化。下面这段代码所产生的现象就是，一旦请求打到接口，程序就会阻塞，产生死锁</p>
+<p>代码简化如下:</p>
+<pre><code class="language-java">@RequestMapping(value = &quot;/test&quot;, method = {GET, POST}) 
+public String test() {
+        //程序在这里阻塞，永远不会返回 
+        return Utils.getCache();
+}
+public class Utils  {
+        private static final ReloadableCache&lt;String&gt; RELOADABLE_CACHE =                      LocalCacheFactory.&lt;String&gt; newBuilder()
+                .enableAutoReload(() -&gt; Duration.ofSeconds(Kconf.get())) 
+                .factory(Utils::init)
+                .name(&quot;reloadableCache&quot;) 
+                .firstAccessFailObject(&quot;empty&quot;)
+                .build();
+        static { //想初始化缓存
+                RELOADABLE_CACHE.get();
+                }
+        public static String getCache() {
+                return RELOADABLE_CACHE.get();
+            }
+}
+</code></pre>
+<h2 id="问题根源">问题根源</h2>
+<pre><code class="language-shell">http-nio-8080-exec-1&quot;#73 daemon prio=5 os_prio=31=296.82stid=0x00007fcb0077e000 nid=0xc903 waiting on ditionon
+[0x000070000e6ea000]
+    java.lang.Thread.State:WAITING (parking)
+        at jdk.internal.misc.Unsafe.park(java.base@11.0.18/Native Method) 
+        - parking to wait for&lt;0x0000000706500500&gt;(a com.google.common.util.concurrent.SettableFuture)
+        at java.util.concurrent.Locks.LockSupport.park((java.base@11.0.18/LockSupport.java:194)
+        at com.google.common.util.concurrent.AbstractFuture.get(AbstractFuture.java:539)
+        at com.github.phantomthief.localcache.impl.ZkNotifyReloadCache.init(ZkNotifyReloadcache.iava:156)
+        at com.github.phantomthief.localcache.impl.ZkNotifyReloadCache.get(ZkNotifyReloadcache.iava:107)
+        - locked &lt;0x0000000706500500&gt; （a  com.github.phantomthief.localcache.impl.ZkNotifyReloadCache）
+        at com.kuaishou.xxxx.Utils.&lt;client&gt;(Utils.java.29)
+</code></pre>
+<p>乍一看并不知道什么导致了死锁阻塞，首先我们看下 jstack，发现请求过来的线程等待资源被挂起 了，下述代码是 ReloadableCache 中 init 操作的主要流程，大概意思是新起了一个线程用来进行 zk subscribe 等操作<br>
+<img src="https://pittttt.github.io/post-images/1753618408312.png" alt="" loading="lazy"><br>
+是不是新线程的 postCacheInit 方法没有完成呢，看下新线程的的执行情况，线程虽然是 RUNNING 状态，但是卡在了一个奇怪的地方，Utils 类的一个 lambda 表达式(com.kuaishou.keyconfig.util.Utils$$Lambda$1022)<br>
+<img src="https://pittttt.github.io/post-images/1753618427987.png" alt="" loading="lazy"><br>
+跟着线程堆栈找一下，发现卡在执行 scheduleRunDuration 这个 Supplier 变量的 get，而这个变量， 是在 Builder 中通过 enableAutoReload 方法进行初始化的，所以这个 lambda 表达式就是 Utils 类 中的初始化方法() -&gt; Duration.ofSeconds(Kconf.get())<br>
+<img src="https://pittttt.github.io/post-images/1753618455475.png" alt="" loading="lazy"><br>
+<img src="https://pittttt.github.io/post-images/1753618460425.png" alt="" loading="lazy"><br>
+接下来我们用 javap 反编译下 Utils 类的代码看看 Lambda 做了什么<br>
+<img src="https://pittttt.github.io/post-images/1753618487380.png" alt="" loading="lazy"><br>
+首先可以看到 lambda 表达式会生成一个私有的静态函数，接下来我们看静态代码块中具体干了什么<br>
+<img src="https://pittttt.github.io/post-images/1753618600214.png" alt="" loading="lazy"><br>
+使用 javap -v 对文件进行反编译，可以看到在 static 代码块中执行了一条 invokedynamic 指令， 这条指令对应了代码中的 lambda 表达式，通过常量池中的标识操作数对应到 BootstrapMethods 属性表，所以这条指令最终走到了 java/lang/invoke/LambdaMetafactory.metafactory 这个方法，这个方法返回一个调用点对象 CallSite，它包含了一个方法句柄，会指向最终绑定到这个调用点上的方法<br>
+<img src="https://pittttt.github.io/post-images/1753618828179.png" alt="" loading="lazy"><br>
+metafactory 这个方法包含方法类型以及指向 lambda 表达式所代表的静态私有方法的方法句柄，最终通过 InnerClassLambdaMetafactory 创建内部匿名类，并通过 asm 动态生成字 节码，最后通过 unsafe 类的 defineAnonymousClass 方法将字节码转换为 class 文件，至 此，完成了一行 lambda 表达式，从字节码到静态匿名方法的转换<br>
+<img src="https://pittttt.github.io/post-images/1753618663476.png" alt="" loading="lazy"><br>
+<img src="https://pittttt.github.io/post-images/1753618212777.png" alt="" loading="lazy"><br>
+<img src="https://pittttt.github.io/post-images/1753618252964.png" alt="" loading="lazy"><br>
+整个调用流程大致如下:<br>
+<img src="https://pittttt.github.io/post-images/1753618223244.png" alt="" loading="lazy"><br>
+问题到这里，基本已经清晰了，类的初始化过程在整个生命周期中只会执行一次，第一个触发类初 始化的线程会获取该类的同步锁，在这个过程中，lambda 表达式又一次触发了同一个类的初始化， 造成了死锁</p>
+<h2 id="参考">参考:</h2>
+<p><a href="http://ifeve.com/jvm%e4%b9%8b%e5%8a%a8%e6%80%81%e6%96%b9%e6%b3%95%e8%b0%83%e7%94%a8%ef%bc%9ainvokedynamic/">JVM 之动态方法调用:invokedynamic</a></p>
+
+							</div>
+	<div class="wow bounceInDown vt-post-tags">
+ 
+					</div>						
+<nav class="navigation3 post-navigation3" role="navigation">
+		
+		<div class="nav-links3">
+      
+		<div class="wow bounceInLeft nav-previous3"><a href="https://pittttt.github.io/post/tan-jiu-fu-dian-shu-ji-suan-zhong-de-jing-du-wen-ti/" rel="prev"> 探究浮点数计算中的精度问题</a></div>
+		 
+		 
+		<div class="wow bounceInRight nav-next3"><a href="https://pittttt.github.io/post/mysql-zhong-union-cha-xun-de-chang-jian-wen-ti/" rel="next"> mysql中UNION查询的常见问题</a></div>
+		
+		</div>
+	</nav>
+	<div class="wow rollIn author-info" style="visibility: visible; animation-name: rollIn;">
+	<div class="author-avatar pull-left"><img src="https://pittttt.github.io/images/avatar.png" ></div>
+ 
+	<div class="author-description"><div class="author-title"><div class="author-link" rel="author"> </div></div>
+
+
+	<p class="author-bio">ALL OR NOTHING, NOW OR NEVER</p></div></div>
+	
+		</div>
+		
+ 
+		
+</article>
+
+<div id="marlin_lite_about_widget-2" class="wow bounceInUp widget marlin_lite_about_widget" data-wow-delay="0.1s">
+		
+        
+		<script src="//cdn1.lncld.net/static/js/3.0.4/av-min.js"></script>
+<script src='https://pittttt.github.io/media/scripts/Valine.min.js'></script>
+
+<div class="comment"></div>
+<script>
+        new Valine({
+            // AV 对象来自上面引入av-min.js
+            av: AV, 
+            el: '.comment',
+            lang: 'zh-cn',
+            
+            admin_email:'779139212@qq.com',
+            
+            
+            emoticon_url: 'https://cdn.jsdelivr.net/gh/track23/blog-static/alu',
+             
+      emoticon_list: ["吐.png","喷血.png","狂汗.png","不说话.png","汗.png","坐等.png","献花.png","不高兴.png","中刀.png","害羞.png","皱眉.png","小眼睛.png","中指.png","尴尬.png","瞅你.png","想一想.png","中枪.png","得意.png","肿包.png","扇耳光.png","亲亲.png","惊喜.png","脸红.png","无所谓.png","便便.png","愤怒.png","蜡烛.png","献黄瓜.png","内伤.png","投降.png","观察.png","看不见.png","击掌.png","抠鼻.png","邪恶.png","看热闹.png","口水.png","抽烟.png","锁眉.png","装大款.png","吐舌.png","无奈.png","长草.png","赞一个.png","呲牙.png","无语.png","阴暗.png","不出所料.png","咽气.png","期待.png","高兴.png","吐血倒地.png","哭泣.png","欢呼.png","黑线.png","喜极而泣.png","喷水.png","深思.png","鼓掌.png","暗地观察.png"],
+     
+      app_id: 'Y2x5OfGlNb2USfogG2CRa2zu-gzGzoHsz',
+      	
+      
+      app_key: 'zlQarf9A4jhvrRxyCn7w12Wb',
+         	
+          
+      placeholder: 'Your comments and criticisms are always welcome.'
+       
+        });
+    </script> 
+
+
+   
+  
+ 
+
+		</div>
+
+			</div>
+			
+
+
+<div class="tocc col l3 hide-on-med-and-down">
+	
+        <div class="toc-widget">
+			
+            <div class="toc-title"></div>
+			
+            <div id="toc-content">
+			
+			
+			</div>
+        </div>
+    </div>
+
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/tocbot/4.5.0/tocbot.min.js"></script>
+<script>
+    $(function () {
+        tocbot.init({
+            tocSelector: '#toc-content',
+            contentSelector: '.entry-summary',
+            headingsOffset: -($(window).height() * 0.4 - 45),
+            // headingsOffset: -205,
+            headingSelector: 'h2, h3, h4'
+        });
+
+        // modify the toc link href to support Chinese.
+        let i = 0;
+        let tocHeading = 'toc-heading-';
+        $('#toc-content a').each(function () {
+            $(this).attr('href', '#' + tocHeading + (++i));
+        });
+
+        // modify the heading title id to support Chinese.
+        i = 0;
+        $('.entry-summary').children('h2, h3, h4').each(function () {
+            $(this).attr('id', tocHeading + (++i));
+        });
+
+        // Set scroll toc fixed.
+        let tocHeight = parseInt($(window).height() * 0.4 - 64);
+        let $tocWidget = $('.toc-widget');
+        $(window).scroll(function () {
+            let scroll = $(window).scrollTop();
+            /* add post toc fixed. */
+            if (scroll > tocHeight) {
+                $tocWidget.addClass('toc-fixed');
+            } else {
+                $tocWidget.removeClass('toc-fixed');
+            }
+        });
+    });
+</script>										 
+
+ 
+       
+
+
+			</div>
+		</div>
+
+		
+		 	<footer id="colophon" class="site-footer">
+
+			<div class="container">
+				<div class="copyright"><span id="runtime_span"></span>
+<script type="text/javascript">
+    function show_runtime() {
+        window.setTimeout("show_runtime()", 1000);
+        X = new Date("06/20/2019 20:30:44");
+        Y = new Date();
+        T = (Y.getTime() - X.getTime());
+        M = 24 * 60 * 60 * 1000;
+        a = T / M;
+        A = Math.floor(a);
+        b = (a - A) * 24;
+        B = Math.floor(b);
+        c = (b - B) * 60;
+        C = Math.floor((b - B) * 60);
+        D = Math.floor((c - C) * 60);
+        runtime_span.innerHTML = A + "day" + B + "h" + C + "min" + D + "s"
+    }
+    show_runtime();
+</script><br>
+COPYRIGHT © 2020 <a href="https://pittttt.github.io" target="_blank">PITT</a> 
+Powered by <a href="https://github.com/getgridea/gridea" target="_blank">Gridea</a><br>Theme:   <a href="https://github.com/shanbufun/gridea-theme-pan" target="_blank" title="Pan"><span>Pan</span></a>.  by <a href="https://shanbu.fun/" target="_blank"  title="山卜方" >Shanbufun</a></div>		
+			</div>
+			
+			<div class="player">
+				<!-- require APlayer -->
+				<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.css">
+				<script src="https://cdn.jsdelivr.net/npm/aplayer/dist/APlayer.min.js"></script>
+				<!-- require MetingJS -->
+				<script src="https://cdn.jsdelivr.net/npm/meting@2/dist/Meting.min.js"></script>
+				<meting-js
+					id="480463002"
+					order="list"
+					server="netease"
+					type="playlist"
+					fixed="true"
+					list-olded="true">
+				</meting-js>
+			</div>
+		
+		</footer>
+
+</div>
+
+<script src="https://cdn.bootcss.com/fitvids/1.2.0/jquery.fitvids.min.js"></script>
+<script type='text/javascript' src='https://pittttt.github.io/media/scripts/marlin-scripts.js'></script>
+ <script src="//tokinx.github.io/lately/lately.min.js"></script>
+  <script>jQuery(document).ready(function(){$.lately({'target':'.lately-a,.lately-b,.lately-c'})});</script>
+  <style type="text/css">a.back_to_top {
+    text-decoration: none;
+    position: fixed;
+    bottom: 40px;
+    right: 30px;
+    background: #f0f0f0;
+    height: 40px;
+    width: 40px;
+    border-radius: 50%;
+    line-height: 36px;
+    font-size: 18px;
+    text-align: center;
+    transition-duration: .5s;
+    transition-propety: background-color;
+    display: none;
+}
+
+a.back_to_top span {
+    color: #888;
+}
+
+a.back_to_top:hover {
+    cursor: pointer;
+    background: #dfdfdf;
+}
+
+a.back_to_top:hover span {
+    color: #555;
+}
+
+@media print, screen and (max-width: 580px) {
+    .back_to_top {
+        display: none !important;
+    }
+}
+
+
+
+</style><a id="back_to_top" href="#" class="back_to_top"><span><i class="iconfont icon-xiangshang"></i></span>
+</a>
+
+
+<script>$(document).ready((function(_this) {
+  return function() {
+    var bt;
+    bt = $('#back_to_top');
+    if ($(document).width() > 480) {
+      $(window).scroll(function() {
+        var st;
+        st = $(window).scrollTop();
+        if (st > 30) {
+          return bt.css('display', 'block');
+        } else {
+          return bt.css('display', 'none');
+        }
+      });
+      return bt.click(function() {
+        $('body,html').animate({
+          scrollTop: 0
+        }, 800);
+        return false;
+      });
+    }
+  };
+})(this));
+</script>
+
+		<script data-no-instant>
+    (function ($) {
+        $.extend({
+            adamsOverload: function () {
+                $('.navigation:eq(0)').remove();
+                $("").attr("rel" , "external");
+                $("a[rel='external'],a[rel='external nofollow']").attr("target","_blank");
+                $("a.vi").attr("rel" , "");
+                $.viewImage({
+                    'target'  : 'img',
+                    'exclude' : '.vsmile-icons img,.gallery img',
+                    'delay'   : 300
+                });
+                $.lately({
+                    'target' : '.commentmetadata a,.infos time,.post-list time'
+                });
+                prettyPrint();
+                
+                $('ul.links li a').each(function(){
+                    if($(this).parent().find('.bg').length==0){
+                        $(this).parent().append('<!---<div class="bg" style="background-image:url(https://c3.glgoo.top/s2/favicons?domain='+$(this).attr("href")+')"></div>--->')
+                    }
+                });
+            }
+        });
+    })(jQuery);
+    jQuery.adamsOverload();
+</script>
+
+</body>
+</html>

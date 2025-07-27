@@ -2,14 +2,73 @@
 <feed xmlns="http://www.w3.org/2005/Atom">
     <id>https://pittttt.github.io</id>
     <title>PITT&apos;S BLOG</title>
-    <updated>2020-07-10T14:53:45.852Z</updated>
+    <updated>2025-07-27T10:53:34.625Z</updated>
     <generator>https://github.com/jpmonette/feed</generator>
     <link rel="alternate" href="https://pittttt.github.io"/>
     <link rel="self" href="https://pittttt.github.io/atom.xml"/>
     <subtitle>所见即所得</subtitle>
     <logo>https://pittttt.github.io/images/avatar.png</logo>
     <icon>https://pittttt.github.io/favicon.ico</icon>
-    <rights>All rights reserved 2020, PITT&apos;S BLOG</rights>
+    <rights>All rights reserved 2025, PITT&apos;S BLOG</rights>
+    <entry>
+        <title type="html"><![CDATA[探究浮点数计算中的精度问题]]></title>
+        <id>https://pittttt.github.io/post/tan-jiu-fu-dian-shu-ji-suan-zhong-de-jing-du-wen-ti/</id>
+        <link href="https://pittttt.github.io/post/tan-jiu-fu-dian-shu-ji-suan-zhong-de-jing-du-wen-ti/">
+        </link>
+        <updated>2024-12-27T10:22:35.000Z</updated>
+        <content type="html"><![CDATA[<blockquote>
+<p>一探究竟众所周知的 double 精度问题</p>
+</blockquote>
+<h2 id="问题再现">问题再现</h2>
+<p>我们都知道浮点数计算有精度问题，这里还是踩坑了，简单描述下产品需求，我们需要通过一个公 式来计算出当前的用户进度，这个进度是有小数的，简化为下述代码</p>
+<pre><code class="language-java">public static void main(String[] args) {
+        double d = 0.1;
+        for (int i = 1; i &amp;lt; 10; i++) {
+            System.out.println(i * d);
+} }
+代码输出如下:
+0.1
+0.2 0.30000000000000004 0.4
+0.5
+0.6000000000000001
+0.7000000000000001
+0.8
+0.9
+</code></pre>
+<p>上面代码的输出结果有两个问题:<br>
+一是 double 运算的精度问题从何而来，double 又是如何运算的; 二是为什么只有部分结果有问题，有些结果看起来是“准确的”; 就是这部分看似“准确”的结果迷惑了我，下面我们带着这两个疑问来探究一下这个问题</p>
+<h2 id="double-的二进制">double 的二进制</h2>
+<p>我们都知道整数十进制转二进制是除 2 取余法，这里不再赘述，我们主要看看小数是如何存储的， 这里借用一张图来说明，简单来说，就是分别将整数部分和小数部分转换为二进制，小数部分采用 乘 2 取整的方法，最后将两部分结合在一起<br>
+<img src="https://pittttt.github.io/post-images/1753612612427.png" alt="" loading="lazy"><br>
+根据浮点数所采用的<a href="https://en.wikipedia.org/wiki/IEEE_754"> IEEE_754</a> 国际标准，1000.101 需要进行规格化，移动小数点后，这个数可以表 示为 1.000101 x 2^3，类似于科学计数法，并且规定小数点左边有且只有一位，必须为 1，同时规 定了单精度浮点数和双精度浮点数的存储格式，如下图所示:<br>
+<img src="https://pittttt.github.io/post-images/1753612703957.png" alt="" loading="lazy"><br>
+●符号位:表示正负数，0 代表正数，1 代表负数 ●指数位:表示小数点的偏移位置，指数位的长度越长则数值的表达范围就越大，double 的指数<br>
+部分是 11 位，IEEE 标准规定双精度浮点的指数取值范围是 -1022~1023，为了不使指数出现负 数，就要加个偏移量， double 的指数偏移量是 1023<br>
+●尾数位:小数点右侧的部分，尾数长度越长，则这个数字的精度越高<br>
+通过上述规则，我们将 0.1 转换为二进制，会发现<br>
+<img src="https://pittttt.github.io/post-images/1753612792431.png" alt="" loading="lazy"><br>
+由于计算机的资源是有限的，所以其实没办法精确地表示 0.1，精度就取决于尾数能存放多少位， 就是在这里，精度损失了，下面我们看下一开始代码中的 0.1*3 是如何计算的</p>
+<blockquote>
+<p>通过 <a href="https://binaryconvert.com/result_double.html?decimal=048046049">binaryconvert</a>可以得到浮点数对应的二进制表示</p>
+</blockquote>
+<p><img src="https://pittttt.github.io/post-images/1753612894076.png" alt="" loading="lazy"><br>
+得到的 1.001100110011001100110011001100110011001100110011001110 x 2^-2 其尾数已经超过了 52 位，这里 IEEE 采用就近舍入<a href="https://zh.wikipedia.org/wiki/%E9%93%B6%E8%A1%8C%E5%AE%B6%E7%AE%97%E6%B3%95">银行家算法</a>，<strong>这里再次造成精度误差</strong><br>
+<img src="https://pittttt.github.io/post-images/1753613143935.png" alt="" loading="lazy"></p>
+<p>这样我们就得到了通过二进制计算的浮点运算结果 1.0011001100110011001100110011001100110011001100110100x2^-2，将其转换为 10 进制，即为 0.30000000000000004(至于为什么是这个数字，下面会提到)，通过上面的运算，我们知道了浮点 运算的计算结果是不准确的，或者说浮点数本身的二进制存储结果就是不精确的，其实到这里，大 概可以猜到一开始 for 循环中的运算结果为什么部分是“准确”的了</p>
+<h2 id="看似正确的结果">看似正确的结果</h2>
+<p>为了解答第二个问题，我们需要知道浮点数的精度范围，IEEE 中规定了精度由尾数位来控制， double 类型的尾数有 52 位，因为规格化后首位必须为 1，所以一共有 53 位二进制，能够准确(不丢失精度)表示的十进制是 17 位，这里直接放出公式，具体的计算原理可参考 <a href="https://www.exploringbinary.com/number-of-decimal-digits-in-a-binary-integer/">Number of Decimal Digits In a Binary Integer</a><br>
+ceil(1+N*log10(2)) N为二进制位数<br>
+知道了这个我们再回头看双精度类型的 0.1 的二进制是如何表示的<br>
+<img src="https://pittttt.github.io/post-images/1753613413472.png" alt="" loading="lazy"><br>
+二进制中的尾数位越多，则所表示的十进制数就越接近 0.1，但是理论上永远不会相等(类比有限小 数永远无法准确表示 1/3)，其实这个二进制转换成十进制后为 0.10000000000000000555111... (当然这里的精度已经超过双精度所能表示的范围了，不能够直接用 double 类型在 Java 程序中进 行验证)由于双精度浮点数的精度限制(17 位小数)，这个数字看似在部分浮点数的运算结果中是 “没问题”的，本质原因是双精度浮点数的精度范围“丢弃”了误差，其实是一种“障眼法”。<br>
+后记<br>
+其实要想避免这个问题并不难，如果对浮点数类型的计算结果有精准度的要求，比如涉及到钱，分 数之类的，直接使用 BigDecimal 处理最为稳妥</p>
+<h2 id="read-more">Read More:</h2>
+<p><a href="https://0.30000000000000004.com/">https://0.30000000000000004.com/</a><br>
+<a href="https://babbage.cs.qc.cuny.edu/IEEE-754/">https://babbage.cs.qc.cuny.edu/IEEE-754/</a><br>
+<a href="https://web.archive.org/web/20120208075518/http:/www.cs.berkeley.edu/~wkahan/ieee754status/IEEE754.PDF">IEEE Standard 754 for Binary Floating-Point Arithmetic</a></p>
+]]></content>
+    </entry>
     <entry>
         <title type="html"><![CDATA[mysql中UNION查询的常见问题]]></title>
         <id>https://pittttt.github.io/post/mysql-zhong-union-cha-xun-de-chang-jian-wen-ti/</id>
@@ -693,64 +752,6 @@ bin目录下提供了多种工具来监控jvm的运行运行状态，能通过�
         };
         return data;
     }
-</code></pre>
-]]></content>
-    </entry>
-    <entry>
-        <title type="html"><![CDATA[Mybatis逆向工程后报错IllegalArgumentException解决]]></title>
-        <id>https://pittttt.github.io/post/mybatis-ni-xiang-gong-cheng-hou-bao-cuo-illegalargumentexception-result-maps-collection-already-contains-value-for-xxx/</id>
-        <link href="https://pittttt.github.io/post/mybatis-ni-xiang-gong-cheng-hou-bao-cuo-illegalargumentexception-result-maps-collection-already-contains-value-for-xxx/">
-        </link>
-        <updated>2020-02-12T14:02:03.000Z</updated>
-        <content type="html"><![CDATA[<p><strong>问题：</strong><br>
-通过配置mybatis逆向工程的配置文件generatorConfig.xml自动生成实体类，接口和xml文件十分方便，但是在启动springboot时，报错<br>
-<em>IllegalArgumentException: Result Maps collection already contains value for xxx</em><br>
-原因其实是，在生成的xxxMapper.xml文件中的resultMap重复了<br>
-<mark>可能存在的情况有两种：</mark></p>
-<h3 id="1再次使用逆向工程生成接口和xml文件时没有删除原来的xml文件导致resultmap重复">1.再次使用逆向工程生成接口和xml文件时，没有删除原来的xml文件，导致resultMap重复</h3>
-<p>下面为复制了控制台报错的开头一部分</p>
-<pre><code>Error creating bean with name 'itemKillMapper' defined in file 
-[D:\apache-tomcat-8.5.42\apache-tomcat-8.5.42\webapps\server\WEB-INF\classes\com\pitt\kill\model\mapper\ItemKillMapper.class]: 
-Unsatisfied dependency expressed through bean property 'sqlSessionFactory'; 
-nested exception is org.springframework.beans.factory.BeanCreationException: 
-Error creating bean with name 'sqlSessionFactory' defined in class path resource [org/mybatis/spring/boot/autoconfigure/MybatisAutoConfiguration.class]: 
-Bean instantiation via factory method failed; nested exception is org.springframework.beans.BeanInstantiationException: 
-Failed to instantiate [org.apache.ibatis.session.SqlSessionFactory]: 
-Factory method 'sqlSessionFactory' threw exception; 
-nested exception is java.lang.NoSuchMethodError: org.apache.ibatis.session.Configuration.setVfsImpl(Ljava/lang/Class;)V
-</code></pre>
-<p><mark>删除原来的xml文件重新生成即可解决</mark></p>
-<h3 id="2使用了version-8x-的-connectorj">2.使用了version 8.x 的 Connector/J</h3>
-<pre><code class="language-xml">&lt;dependency&gt;
-       &lt;groupId&gt;mysql&lt;/groupId&gt;
-       &lt;artifactId&gt;mysql-connector-java&lt;/artifactId&gt;
-       &lt;version&gt;8.0.11&lt;/version&gt;
-&lt;/dependency&gt;
-</code></pre>
-<p>由于我使用了8.0.11版本的mysql-connector-java，逆向工程生成实体类时会自动生成UserWithBLOBs.java 和 UserKey.java文件，而<mark>这两个文件会导致UserMapper.xml中的resultMap重复。</mark> 从而产生报错。</p>
-<p>在<a href="http://mybatis.org/generator/usage/mysql.html#">MyBatis Generator</a> 的官方文档中对这个问题进行了描述</p>
-<blockquote>
-<p>If you are using version 8.x of Connector/J you may notice that the generator attempts to generate code for tables in the MySql information schemas (sys, information_schema, performance_schema, etc.) This is probably not what you want! To disable this behavior, add the property “nullCatalogMeansCurrent=true” to your JDBC URL.</p>
-</blockquote>
-<p>翻译为：</p>
-<blockquote>
-<p>如果您使用的是Connector / J的8.x版，您可能会注意到生成器尝试为MySql信息模式（sys，information_schema，performance_schema等）中的表生成代码。这可能不是您想要的！ 要禁用此行为，请将属性“nullCatalogMeansCurrent = true”添加到JDBC URL。</p>
-</blockquote>
-<p><strong>解决:</strong><br>
-1.更换低版本Connector<br>
-2.<mark>将属性“nullCatalogMeansCurrent = true”添加到JDBC URL（推荐）</mark></p>
-<pre><code> &lt;jdbcConnection 
-     driverClass=&quot;com.mysql.cj.jdbc.Driver&quot;
-     connectionURL=&quot;jdbc:mysql://localhost:3306/db_second_kill?serverTimezone=UTC&amp;amp;useUnicode=true&amp;amp;characterEncoding=utf-8&amp;amp;useSSL=false&amp;amp;nullCatalogMeansCurrent = true&quot; 
-     userId=&quot;root&quot;
-     password=&quot;123456&quot;&gt;
- &lt;/jdbcConnection&gt;
-</code></pre>
-<p><mark><strong>此外，注意！</strong></mark><br>
-如果在properties配置文件中配置了mybatis.mapper-locations，则在mybatis的xml配置文件中不用再写&lt; mapper resource &gt;配置</p>
-<pre><code class="language-java">mybatis.config-location=classpath:mybatis-config.xml
-mybatis.checkConfigLocation = true
-mybatis.mapper-locations=classpath:mappers/*.xml
 </code></pre>
 ]]></content>
     </entry>
